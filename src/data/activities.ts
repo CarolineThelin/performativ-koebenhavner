@@ -36,8 +36,8 @@ export const categories: Category[] = [
           { name: 'Anderson', points: 5 },
           { name: 'Hart', points: 5 },
           { name: 'La Glace', points: 5 },
-          { name: 'Plain', points: 0 },
           { name: 'Føtex', points: -5 },
+          { name: 'Plain', points: 0 },
         ],
       },
       {
@@ -56,6 +56,7 @@ export const categories: Category[] = [
         extras: [
           { name: 'Naturvin', points: 5 },
           { name: 'Orange vin', points: 5 },
+          { name: 'På vinbar', points: 5 },
         ],
       },
       { name: 'Kombucha', points: 10 },
@@ -101,7 +102,7 @@ export const categories: Category[] = [
           { name: 'Løbevest', points: 5 },
           { name: 'Hurtigbriller', points: 5 },
           { name: 'Tracked på Strava', points: 5 },
-          { name: 'Var det om søerne', points: 5 },
+          { name: 'Om søerne', points: 5 },
         ],
       },
       {
@@ -120,7 +121,7 @@ export const categories: Category[] = [
           { name: 'Reformer', points: 5 },
           { name: 'Heated', points: 5 },
           { name: 'Lagree', points: 5 },
-          { name: 'Måtte', points: 5 },
+          { name: 'Måtte', points: 0 },
         ],
       },
       {
@@ -136,7 +137,7 @@ export const categories: Category[] = [
         points: 10,
         extras: [
           { name: 'Med mellemlederen', points: 5 },
-          { name: 'Egen ketsjer', points: 5 },
+          { name: 'Eget bat', points: 5 },
         ],
       },
     ],
@@ -147,7 +148,7 @@ export const categories: Category[] = [
       { name: 'Solnedgang på Dronning Louises Bro', points: 10 },
       { name: 'Læs bog på offentlig bænk', points: 10 },
       { name: 'Skrive dagbog på cafe', points: 10 },
-      { name: 'Omnium', points: 10 },
+      { name: 'En tur på en omnium', points: 10 },
       {
         name: 'Tanning',
         points: 10,

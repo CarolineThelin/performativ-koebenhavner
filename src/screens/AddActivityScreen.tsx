@@ -203,7 +203,7 @@ export default function AddActivityScreen() {
                                       {extraChecked && <span className={styles.checkmark}>✓</span>}
                                     </span>
                                     <span className={styles.extraName}>{extra.name}</span>
-                                    <span className={styles.points}>{extra.points > 0 ? `+${extra.points}` : `${extra.points}`}</span>
+                                    {extra.points !== 0 && <span className={styles.points}>{extra.points > 0 ? `+${extra.points}` : `${extra.points}`}</span>}
                                   </button>
                                 </li>
                               );

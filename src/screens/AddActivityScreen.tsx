@@ -23,8 +23,15 @@ export default function AddActivityScreen() {
   const [qualifyMessage, setQualifyMessage] = useState('');
 
   function toggleCategory(name: string) {
-    setOpenCategory(openCategory === name ? null : name);
-    setOpenActivity(null);
+    if (openCategory === name) {
+      setOpenCategory(null);
+      setSelections([]);
+      setOpenActivity(null);
+    } else {
+      setOpenCategory(name);
+      setSelections([]);
+      setOpenActivity(null);
+    }
   }
 
   function toggleActivity(categoryName: string, activity: Activity) {

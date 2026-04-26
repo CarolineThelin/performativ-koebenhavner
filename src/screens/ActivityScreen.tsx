@@ -254,8 +254,8 @@ export default function ActivityScreen() {
             <div className={styles.postHeader}>
               <button
                 className={styles.avatar}
-                onClick={() => post.user_id !== currentUserId && navigate(`/bruger/${post.user_id}`)}
-                style={{ cursor: post.user_id !== currentUserId ? 'pointer' : 'default', background: 'none', border: 'none', padding: 0 }}
+                onClick={() => navigate(`/bruger/${post.user_id}`)}
+                style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
               >
                 {avatarMap[post.user_id] ? (
                   <img src={avatarMap[post.user_id]} alt="" className={styles.avatarPhoto} />
@@ -266,8 +266,8 @@ export default function ActivityScreen() {
               <div className={styles.postMeta}>
                 <span
                   className={styles.postUsername}
-                  onClick={() => post.user_id !== currentUserId && navigate(`/bruger/${post.user_id}`)}
-                  style={{ cursor: post.user_id !== currentUserId ? 'pointer' : 'default' }}
+                  onClick={() => navigate(`/bruger/${post.user_id}`)}
+                  style={{ cursor: 'pointer' }}
                 >
                   {post.username}
                 </span>

@@ -37,7 +37,6 @@ export const categories: Category[] = [
           { name: 'Hart', points: 5 },
           { name: 'La Glace', points: 5 },
           { name: 'Føtex', points: -5 },
-          { name: 'Plain', points: 0 },
         ],
       },
       {

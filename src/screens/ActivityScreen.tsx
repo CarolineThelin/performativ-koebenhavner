@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { categories } from '../data/activities';
 import TabBar from '../components/TabBar';
@@ -45,6 +45,7 @@ function formatDate(iso: string) {
 
 export default function ActivityScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [posts, setPosts] = useState<Post[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -118,6 +119,13 @@ export default function ActivityScreen() {
   useEffect(() => {
     fetchFeed();
   }, [fetchFeed]);
+
+  useEffect(() => {
+    const scrollToId = (location.state as { scrollToId?: string } | null)?.scrollToId;
+    if (!scrollToId || posts.length === 0) return;
+    const el = document.getElementById(`post-${scrollToId}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [location.state, posts]);
 
   async function handlePhotoUpload(post: Post, file: File) {
     const path = `${post.user_id}/${Date.now()}_${file.name}`;
@@ -277,7 +285,7 @@ export default function ActivityScreen() {
         )}
 
         {posts.map((post) => (
-          <article key={post.id} className={styles.post}>
+          <article key={post.id} id={`post-${post.id}`} className={styles.post}>
             <div className={styles.postHeader}>
               <button
                 className={styles.avatar}

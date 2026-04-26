@@ -24,6 +24,7 @@ interface ActivityNotification {
   type: 'like' | 'comment';
   from_username: string;
   activity_name: string;
+  activity_id: string;
   created_at: string;
   body?: string;
 }
@@ -146,6 +147,7 @@ export default function PerformanceScreen() {
           type: 'like',
           from_username: likerNames[like.user_id] ?? 'Nogen',
           activity_name: activityNameMap[like.activity_id] ?? '',
+          activity_id: like.activity_id,
           created_at: like.created_at,
         });
       }
@@ -164,6 +166,7 @@ export default function PerformanceScreen() {
           type: 'comment',
           from_username: c.username ?? 'Nogen',
           activity_name: activityNameMap[c.activity_id] ?? '',
+          activity_id: c.activity_id,
           created_at: c.created_at,
           body: c.body,
         });
@@ -362,11 +365,14 @@ export default function PerformanceScreen() {
                     </div>
                   ) : (
                     <div key={item.id} className={styles.notificationRow}>
-                      <span className={styles.notificationText}>
+                      <button
+                        className={styles.notificationLink}
+                        onClick={() => navigate('/aktivitet', { state: { scrollToId: item.n.activity_id } })}
+                      >
                         {item.n.type === 'like'
                           ? `${item.n.from_username} likede din ${item.n.activity_name}`
                           : `${item.n.from_username} kommenterede din ${item.n.activity_name}: "${item.n.body}"`}
-                      </span>
+                      </button>
                       <button className={styles.dismissButton} onClick={() => dismissNotif(item.id)}>✕</button>
                     </div>
                   )

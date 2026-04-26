@@ -198,6 +198,19 @@
   color: var(--color-text-muted);
 }
 
+.notificationLink {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  flex: 1;
+}
+
 .dismissButton {
   background: none;
   border: none;

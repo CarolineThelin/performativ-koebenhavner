@@ -188,19 +188,18 @@ export const categories: Category[] = [
           { name: 'Kongens Have', points: -5 },
         ],
       },
-      {
-        name: 'I byen',
-        points: 10,
-        extras: [
-          { name: 'Hangaren', points: 5 },
-          { name: 'Bodega Dansa', points: 5 },
-          { name: 'Sø', points: 5 },
-          { name: 'Sigurdsgade', points: 5 },
-          { name: 'Kødbyen', points: 5 },
-          { name: 'Blågårdsgade', points: 5 },
-          { name: 'Alexandra Hus', points: 5 },
-        ],
-      },
+    ],
+  },
+  {
+    name: 'I byen',
+    activities: [
+      { name: 'Hangaren', points: 10, extras: [] },
+      { name: 'Bodega Dansa', points: 10, extras: [] },
+      { name: 'Sø', points: 10, extras: [] },
+      { name: 'Sigurdsgade', points: 10, extras: [] },
+      { name: 'Kødbyen', points: 10, extras: [] },
+      { name: 'Blågårdsgade', points: 10, extras: [] },
+      { name: 'Alexandra Hus', points: 10, extras: [] },
     ],
   },
 ];

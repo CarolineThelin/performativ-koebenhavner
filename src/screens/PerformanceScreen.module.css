@@ -198,6 +198,17 @@
   color: var(--color-text-muted);
 }
 
+.showMoreButton {
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 8px 0 0;
+}
+
 .acceptButton {
   font-family: var(--font-body);
   font-weight: 600;

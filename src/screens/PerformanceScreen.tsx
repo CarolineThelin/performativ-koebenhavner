@@ -38,6 +38,7 @@ export default function PerformanceScreen() {
   const [foundUsers, setFoundUsers] = useState<{ id: string; username: string }[]>([]);
   const [currentUserId, setCurrentUserId] = useState('');
   const [activityNotifs, setActivityNotifs] = useState<ActivityNotification[]>([]);
+  const [showAllNotifs, setShowAllNotifs] = useState(false);
 
   const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -282,35 +283,6 @@ export default function PerformanceScreen() {
         )}
 
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Notifikationer</h2>
-          {requests.length === 0 && activityNotifs.length === 0 ? (
-            <p className={styles.emptyNotifications}>Ingen nye notifikationer</p>
-          ) : (
-            <>
-              {requests.map((req) => (
-                <div key={req.id} className={styles.notificationRow}>
-                  <span className={styles.notificationText}>
-                    {req.from_username} tilføjede dig
-                  </span>
-                  <button className={styles.acceptButton} onClick={() => acceptRequest(req)}>
-                    Tilføj
-                  </button>
-                </div>
-              ))}
-              {activityNotifs.map((n) => (
-                <div key={n.id} className={styles.notificationRow}>
-                  <span className={styles.notificationText}>
-                    {n.type === 'like'
-                      ? `${n.from_username} likede din ${n.activity_name}`
-                      : `${n.from_username} kommenterede din ${n.activity_name}: "${n.body}"`}
-                  </span>
-                </div>
-              ))}
-            </>
-          )}
-        </section>
-
-        <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Leaderboard</h2>
           <ul className={styles.leaderboard}>
             {leaderboard.map((entry, i) => (
@@ -337,6 +309,48 @@ export default function PerformanceScreen() {
               </li>
             ))}
           </ul>
+        </section>
+
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Notifikationer</h2>
+          {requests.length === 0 && activityNotifs.length === 0 ? (
+            <p className={styles.emptyNotifications}>Ingen nye notifikationer</p>
+          ) : (() => {
+            const allNotifs = [
+              ...requests.map((req) => ({ id: req.id, type: 'request' as const, req })),
+              ...activityNotifs.map((n) => ({ id: n.id, type: 'activity' as const, n })),
+            ];
+            const visible = showAllNotifs ? allNotifs : allNotifs.slice(0, 3);
+            return (
+              <>
+                {visible.map((item) =>
+                  item.type === 'request' ? (
+                    <div key={item.id} className={styles.notificationRow}>
+                      <span className={styles.notificationText}>
+                        {item.req.from_username} tilføjede dig
+                      </span>
+                      <button className={styles.acceptButton} onClick={() => acceptRequest(item.req)}>
+                        Tilføj
+                      </button>
+                    </div>
+                  ) : (
+                    <div key={item.id} className={styles.notificationRow}>
+                      <span className={styles.notificationText}>
+                        {item.n.type === 'like'
+                          ? `${item.n.from_username} likede din ${item.n.activity_name}`
+                          : `${item.n.from_username} kommenterede din ${item.n.activity_name}: "${item.n.body}"`}
+                      </span>
+                    </div>
+                  )
+                )}
+                {allNotifs.length > 3 && !showAllNotifs && (
+                  <button className={styles.showMoreButton} onClick={() => setShowAllNotifs(true)}>
+                    Vis mere ({allNotifs.length - 3} flere)
+                  </button>
+                )}
+              </>
+            );
+          })()}
         </section>
       </main>
 

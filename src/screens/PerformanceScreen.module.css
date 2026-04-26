@@ -192,6 +192,12 @@
   color: var(--color-text);
 }
 
+.emptyNotifications {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
 .acceptButton {
   font-family: var(--font-body);
   font-weight: 600;

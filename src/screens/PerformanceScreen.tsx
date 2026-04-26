@@ -19,6 +19,15 @@ interface FriendRequest {
   from_username: string;
 }
 
+interface ActivityNotification {
+  id: string;
+  type: 'like' | 'comment';
+  from_username: string;
+  activity_name: string;
+  created_at: string;
+  body?: string;
+}
+
 export default function PerformanceScreen() {
   const navigate = useNavigate();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -28,6 +37,7 @@ export default function PerformanceScreen() {
   const [addMessage, setAddMessage] = useState('');
   const [foundUsers, setFoundUsers] = useState<{ id: string; username: string }[]>([]);
   const [currentUserId, setCurrentUserId] = useState('');
+  const [activityNotifs, setActivityNotifs] = useState<ActivityNotification[]>([]);
 
   const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -91,6 +101,72 @@ export default function PerformanceScreen() {
       .eq('status', 'pending');
 
     setRequests(reqs ?? []);
+
+    // Hent likes og kommentarer på egne aktiviteter fra andre brugere
+    const { data: myActivities } = await supabase
+      .from('user_activities')
+      .select('id, activity_name')
+      .eq('user_id', user.id);
+
+    const myActivityIds = (myActivities ?? []).map((a) => a.id);
+    const activityNameMap: Record<string, string> = {};
+    for (const a of myActivities ?? []) activityNameMap[a.id] = a.activity_name;
+
+    const notifs: ActivityNotification[] = [];
+
+    if (myActivityIds.length > 0) {
+      const { data: likes } = await supabase
+        .from('activity_likes')
+        .select('activity_id, user_id, created_at')
+        .in('activity_id', myActivityIds)
+        .neq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      const likerIds = [...new Set((likes ?? []).map((l) => l.user_id))];
+      let likerNames: Record<string, string> = {};
+      if (likerIds.length > 0) {
+        const { data: likerActivities } = await supabase
+          .from('user_activities')
+          .select('user_id, username')
+          .in('user_id', likerIds);
+        for (const a of likerActivities ?? []) {
+          if (a.username) likerNames[a.user_id] = a.username;
+        }
+      }
+
+      for (const like of likes ?? []) {
+        notifs.push({
+          id: `like-${like.activity_id}-${like.user_id}`,
+          type: 'like',
+          from_username: likerNames[like.user_id] ?? 'Nogen',
+          activity_name: activityNameMap[like.activity_id] ?? '',
+          created_at: like.created_at,
+        });
+      }
+
+      const { data: comments } = await supabase
+        .from('activity_comments')
+        .select('id, activity_id, user_id, username, body, created_at')
+        .in('activity_id', myActivityIds)
+        .neq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      for (const c of comments ?? []) {
+        notifs.push({
+          id: `comment-${c.id}`,
+          type: 'comment',
+          from_username: c.username ?? 'Nogen',
+          activity_name: activityNameMap[c.activity_id] ?? '',
+          created_at: c.created_at,
+          body: c.body,
+        });
+      }
+    }
+
+    notifs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    setActivityNotifs(notifs);
   }, []);
 
   useEffect(() => {
@@ -205,24 +281,34 @@ export default function PerformanceScreen() {
           </div>
         )}
 
-        {requests.length > 0 && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Notifikationer</h2>
-            {requests.map((req) => (
-              <div key={req.id} className={styles.notificationRow}>
-                <span className={styles.notificationText}>
-                  {req.from_username} tilføjede dig
-                </span>
-                <button
-                  className={styles.acceptButton}
-                  onClick={() => acceptRequest(req)}
-                >
-                  Tilføj
-                </button>
-              </div>
-            ))}
-          </section>
-        )}
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Notifikationer</h2>
+          {requests.length === 0 && activityNotifs.length === 0 ? (
+            <p className={styles.emptyNotifications}>Ingen nye notifikationer</p>
+          ) : (
+            <>
+              {requests.map((req) => (
+                <div key={req.id} className={styles.notificationRow}>
+                  <span className={styles.notificationText}>
+                    {req.from_username} tilføjede dig
+                  </span>
+                  <button className={styles.acceptButton} onClick={() => acceptRequest(req)}>
+                    Tilføj
+                  </button>
+                </div>
+              ))}
+              {activityNotifs.map((n) => (
+                <div key={n.id} className={styles.notificationRow}>
+                  <span className={styles.notificationText}>
+                    {n.type === 'like'
+                      ? `${n.from_username} likede din ${n.activity_name}`
+                      : `${n.from_username} kommenterede din ${n.activity_name}: "${n.body}"`}
+                  </span>
+                </div>
+              ))}
+            </>
+          )}
+        </section>
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Leaderboard</h2>

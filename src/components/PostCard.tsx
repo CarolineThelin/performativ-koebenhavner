@@ -88,14 +88,23 @@ export default function PostCard({
 
   async function handleLikeClick() {
     if (isOwn) {
-      const { data } = await supabase
+      const { data: likes } = await supabase
         .from('activity_likes')
-        .select('user_id, profiles(username)')
+        .select('user_id')
         .eq('activity_id', post.id);
-      const names = (data ?? []).map((row: { profiles: { username: string }[] | null }) => {
-        const p = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
-        return (p as { username: string } | null)?.username ?? 'Ukendt';
-      });
+      const userIds = (likes ?? []).map((l: { user_id: string }) => l.user_id);
+      let names: string[] = [];
+      if (userIds.length > 0) {
+        const { data: activities } = await supabase
+          .from('user_activities')
+          .select('user_id, username')
+          .in('user_id', userIds);
+        const nameMap: Record<string, string> = {};
+        for (const a of activities ?? []) {
+          if (a.username) nameMap[a.user_id] = a.username;
+        }
+        names = userIds.map((id: string) => nameMap[id] ?? 'Ukendt');
+      }
       setLikers(names);
       setShowLikersModal(true);
     } else {
@@ -236,7 +245,7 @@ export default function PostCard({
       <div className={styles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) setShowLikersModal(false); }}>
         <div className={styles.modalCard}>
           <p className={styles.modalTitle}>
-            {likers.length === 0 ? 'Ingen likes endnu' : `${post.likes} ${post.likes === 1 ? 'like' : 'likes'}`}
+            {likers.length === 0 ? 'Ingen likes endnu' : 'Likes'}
           </p>
           {likers.length > 0 && (
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>

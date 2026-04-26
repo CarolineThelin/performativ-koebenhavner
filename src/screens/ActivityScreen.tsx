@@ -56,6 +56,7 @@ export default function ActivityScreen() {
   const [editOpenCategory, setEditOpenCategory] = useState<string | null>(null);
   const [confirmDeletePost, setConfirmDeletePost] = useState<Post | null>(null);
   const [confirmDeleteComment, setConfirmDeleteComment] = useState<{ postId: string; commentId: string } | null>(null);
+  const [likersModal, setLikersModal] = useState<{ postId: string; names: string[] } | null>(null);
   const [expandedComments, setExpandedComments] = useState<string | null>(null);
   const [commentsMap, setCommentsMap] = useState<Record<string, Comment[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
@@ -238,6 +239,31 @@ export default function ActivityScreen() {
     );
   }
 
+  async function handleLikeClick(post: Post) {
+    if (post.user_id === currentUserId) {
+      const { data: likes } = await supabase
+        .from('activity_likes')
+        .select('user_id')
+        .eq('activity_id', post.id);
+      const userIds = (likes ?? []).map((l: { user_id: string }) => l.user_id);
+      let names: string[] = [];
+      if (userIds.length > 0) {
+        const { data: activities } = await supabase
+          .from('user_activities')
+          .select('user_id, username')
+          .in('user_id', userIds);
+        const nameMap: Record<string, string> = {};
+        for (const a of activities ?? []) {
+          if (a.username) nameMap[a.user_id] = a.username;
+        }
+        names = userIds.map((id: string) => nameMap[id] ?? 'Ukendt');
+      }
+      setLikersModal({ postId: post.id, names });
+    } else {
+      toggleLike(post);
+    }
+  }
+
   return (
     <div className={styles.screen}>
       <header className={styles.header}>
@@ -347,7 +373,7 @@ export default function ActivityScreen() {
                 </button>
                 <button
                   className={`${styles.likeButton} ${post.liked_by_me ? styles.liked : ''}`}
-                  onClick={() => toggleLike(post)}
+                  onClick={() => handleLikeClick(post)}
                 >
                   <img src={likeIcon} alt="Like" className={styles.likeIcon} />
                   <span className={styles.likeCount}>{post.likes}</span>
@@ -507,6 +533,26 @@ export default function ActivityScreen() {
           </div>
         </div>
       )}
+      {likersModal && (
+        <div className={styles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) setLikersModal(null); }}>
+          <div className={styles.modalCard}>
+            <p className={styles.modalTitle}>
+              {likersModal.names.length === 0 ? 'Ingen likes endnu' : 'Likes'}
+            </p>
+            {likersModal.names.length > 0 && (
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {likersModal.names.map((name, i) => (
+                  <li key={i} style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--color-text)', fontWeight: 600 }}>
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button className={styles.modalCancel} onClick={() => setLikersModal(null)}>Luk</button>
+          </div>
+        </div>
+      )}
+
       {confirmDeleteComment && (
         <div className={styles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) setConfirmDeleteComment(null); }}>
           <div className={styles.modalCard}>

@@ -112,7 +112,7 @@ export const categories: Category[] = [
     ],
   },
   {
-    name: 'Træning/Sport',
+    name: 'Træning',
     activities: [
       {
         name: 'Løb',
@@ -163,6 +163,18 @@ export const categories: Category[] = [
     ],
   },
   {
+    name: 'I byen',
+    activities: [
+      { name: 'Hangaren', points: 10, extras: [] },
+      { name: 'Bodega Dansa', points: 10, extras: [] },
+      { name: 'Sø', points: 10, extras: [] },
+      { name: 'Sigurdsgade', points: 10, extras: [] },
+      { name: 'Kødbyen', points: 10, extras: [] },
+      { name: 'Blågårdsgade', points: 10, extras: [] },
+      { name: 'Alexandra Hus', points: 10, extras: [] },
+    ],
+  },
+  {
     name: 'Main Character Moments',
     activities: [
       { name: 'Solnedgang på Dronning Louises Bro', points: 10 },
@@ -188,18 +200,6 @@ export const categories: Category[] = [
           { name: 'Kongens Have', points: -5 },
         ],
       },
-    ],
-  },
-  {
-    name: 'I byen',
-    activities: [
-      { name: 'Hangaren', points: 10, extras: [] },
-      { name: 'Bodega Dansa', points: 10, extras: [] },
-      { name: 'Sø', points: 10, extras: [] },
-      { name: 'Sigurdsgade', points: 10, extras: [] },
-      { name: 'Kødbyen', points: 10, extras: [] },
-      { name: 'Blågårdsgade', points: 10, extras: [] },
-      { name: 'Alexandra Hus', points: 10, extras: [] },
     ],
   },
 ];

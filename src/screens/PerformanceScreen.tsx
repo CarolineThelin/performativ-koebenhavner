@@ -123,13 +123,11 @@ export default function PerformanceScreen() {
     if (myActivityIds.length > 0) {
       const { data: likes } = await supabase
         .from('activity_likes')
-        .select('activity_id, user_id, created_at')
+        .select('activity_id, user_id')
         .in('activity_id', myActivityIds)
-        .neq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20);
+        .neq('user_id', user.id);
 
-      const likerIds = [...new Set((likes ?? []).map((l) => l.user_id))];
+      const likerIds = [...new Set((likes ?? []).map((l: { user_id: string }) => l.user_id))];
       let likerNames: Record<string, string> = {};
       if (likerIds.length > 0) {
         const { data: likerActivities } = await supabase
@@ -148,7 +146,7 @@ export default function PerformanceScreen() {
           from_username: likerNames[like.user_id] ?? 'Nogen',
           activity_name: activityNameMap[like.activity_id] ?? '',
           activity_id: like.activity_id,
-          created_at: like.created_at,
+          created_at: '',
         });
       }
 

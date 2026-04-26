@@ -31,6 +31,17 @@
   line-height: 1;
 }
 
+.backButtonContent {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px 0 4px;
+}
+
 .headerTitle {
   font-family: var(--font-heading);
   font-size: 36px;

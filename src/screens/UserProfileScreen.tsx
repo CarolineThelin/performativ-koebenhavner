@@ -171,11 +171,11 @@ export default function UserProfileScreen() {
   return (
     <div className={styles.screen}>
       <header className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>←</button>
         <h1 className={styles.headerTitle}>{username.toUpperCase()}</h1>
       </header>
 
       <main className={styles.content}>
+        <button className={styles.backButtonContent} onClick={() => navigate(-1)}>← Tilbage</button>
         <section className={styles.userCard}>
           <div className={styles.avatar}>
             {avatarUrl ? (

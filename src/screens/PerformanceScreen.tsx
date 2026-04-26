@@ -39,6 +39,7 @@ export default function PerformanceScreen() {
   const [currentUserId, setCurrentUserId] = useState('');
   const [activityNotifs, setActivityNotifs] = useState<ActivityNotification[]>([]);
   const [showAllNotifs, setShowAllNotifs] = useState(false);
+  const [showAllLeaderboard, setShowAllLeaderboard] = useState(false);
 
   const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -285,7 +286,7 @@ export default function PerformanceScreen() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Leaderboard</h2>
           <ul className={styles.leaderboard}>
-            {leaderboard.map((entry, i) => (
+            {(showAllLeaderboard ? leaderboard : leaderboard.slice(0, 15)).map((entry, i) => (
               <li key={entry.user_id} className={styles.leaderboardItem}>
                 <div className={styles.leaderboardRow}>
                   <span className={styles.leaderboardName}>
@@ -309,6 +310,11 @@ export default function PerformanceScreen() {
               </li>
             ))}
           </ul>
+          {leaderboard.length > 15 && !showAllLeaderboard && (
+            <button className={styles.showMoreButton} onClick={() => setShowAllLeaderboard(true)}>
+              Vis flere ({leaderboard.length - 15} flere)
+            </button>
+          )}
         </section>
 
         <section className={styles.section}>
@@ -345,7 +351,7 @@ export default function PerformanceScreen() {
                 )}
                 {allNotifs.length > 3 && !showAllNotifs && (
                   <button className={styles.showMoreButton} onClick={() => setShowAllNotifs(true)}>
-                    Vis mere ({allNotifs.length - 3} flere)
+                    Vis flere ({allNotifs.length - 3} flere)
                   </button>
                 )}
               </>

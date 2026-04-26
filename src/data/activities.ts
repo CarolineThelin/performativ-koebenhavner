@@ -160,7 +160,7 @@ export const categories: Category[] = [
       { name: 'Skrive dagbog på cafe', points: 10 },
       { name: 'En tur på en omnium', points: 10 },
       {
-        name: 'Gå en tur om søerne',
+        name: 'Gåtur om søerne',
         points: 10,
         extras: [
           { name: 'På en date', points: 5 },

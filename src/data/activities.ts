@@ -160,6 +160,7 @@ export const categories: Category[] = [
           { name: 'Eget bat', points: 5 },
         ],
       },
+      { name: 'Barry', points: 10, extras: [] },
     ],
   },
   {
@@ -198,6 +199,17 @@ export const categories: Category[] = [
           { name: 'Islands Brygge', points: 5 },
           { name: 'Broens Gadekøkken', points: 5 },
           { name: 'Kongens Have', points: -5 },
+        ],
+      },
+      {
+        name: 'Loppestand',
+        points: 10,
+        extras: [
+          { name: 'Gentofte', points: 5 },
+          { name: 'Veras', points: 5 },
+          { name: 'Dronning Louises bro', points: 5 },
+          { name: 'Enghave plads', points: 5 },
+          { name: 'Det grønne', points: 5 },
         ],
       },
     ],

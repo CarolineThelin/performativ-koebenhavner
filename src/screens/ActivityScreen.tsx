@@ -439,29 +439,38 @@ export default function ActivityScreen() {
                             </button>
 
                             {selected && act.extras && act.extras.length > 0 && (
-                              <ul className={styles.editExtras}>
-                                {act.extras.map((extra) => {
-                                  const checked = editExtras.includes(extra.name);
-                                  return (
-                                    <li key={extra.name}>
-                                      <button
-                                        className={styles.editActivityRow}
-                                        onClick={() => setEditExtras((prev) =>
-                                          checked ? prev.filter((e) => e !== extra.name) : [...prev, extra.name]
-                                        )}
-                                      >
-                                        <span className={`${styles.editCheckbox} ${checked ? styles.editChecked : ''}`}>
-                                          {checked && <span className={styles.editCheckmark}>✓</span>}
-                                        </span>
-                                        <span className={styles.editExtraName}>{extra.name}</span>
-                                        <span className={styles.editPoints}>
-                                          {extra.points > 0 ? `+${extra.points}` : `${extra.points}`}
-                                        </span>
-                                      </button>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
+                              <>
+                                {editExtras.length === 0 && (
+                                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#c0392b', padding: '4px 0 4px 32px', margin: 0 }}>
+                                    Vælg mindst én underkategori
+                                  </p>
+                                )}
+                                <ul className={styles.editExtras}>
+                                  {act.extras.map((extra) => {
+                                    const checked = editExtras.includes(extra.name);
+                                    return (
+                                      <li key={extra.name}>
+                                        <button
+                                          className={styles.editActivityRow}
+                                          onClick={() => setEditExtras((prev) =>
+                                            checked ? prev.filter((e) => e !== extra.name) : [...prev, extra.name]
+                                          )}
+                                        >
+                                          <span className={`${styles.editCheckbox} ${checked ? styles.editChecked : ''}`}>
+                                            {checked && <span className={styles.editCheckmark}>✓</span>}
+                                          </span>
+                                          <span className={styles.editExtraName}>{extra.name}</span>
+                                          {extra.points !== 0 && (
+                                            <span className={styles.editPoints}>
+                                              {extra.points > 0 ? `+${extra.points}` : `${extra.points}`}
+                                            </span>
+                                          )}
+                                        </button>
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
+                              </>
                             )}
                           </li>
                         );
@@ -472,7 +481,16 @@ export default function ActivityScreen() {
               ))}
             </div>
 
-            <button className={styles.modalSave} onClick={saveEdit}>Gem</button>
+            <button
+              className={styles.modalSave}
+              onClick={saveEdit}
+              disabled={(() => {
+                const act = categories.flatMap((c) => c.activities).find((a) => a.name === editActivityKey);
+                return !!(act?.extras?.length && editExtras.length === 0);
+              })()}
+            >
+              Gem
+            </button>
           </div>
         </div>
       )}

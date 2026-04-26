@@ -19,7 +19,7 @@ export const categories: Category[] = [
     name: 'Mad',
     activities: [
       {
-        name: 'Bolle med ost',
+        name: 'BMO',
         points: 10,
         extras: [
           { name: 'Surdej', points: 5 },

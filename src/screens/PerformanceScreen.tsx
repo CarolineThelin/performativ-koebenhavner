@@ -39,6 +39,9 @@ export default function PerformanceScreen() {
   const [currentUserId, setCurrentUserId] = useState('');
   const [activityNotifs, setActivityNotifs] = useState<ActivityNotification[]>([]);
   const [showAllNotifs, setShowAllNotifs] = useState(false);
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(
+    () => new Set(JSON.parse(localStorage.getItem('dismissed_notifs') ?? '[]'))
+  );
   const [showAllLeaderboard, setShowAllLeaderboard] = useState(false);
 
   const load = useCallback(async () => {
@@ -212,6 +215,18 @@ export default function PerformanceScreen() {
     }
   }
 
+  function dismissNotif(id: string) {
+    const updated = new Set(dismissedIds);
+    updated.add(id);
+    setDismissedIds(updated);
+    localStorage.setItem('dismissed_notifs', JSON.stringify([...updated]));
+  }
+
+  async function dismissRequest(req: FriendRequest) {
+    await supabase.from('friend_requests').delete().eq('id', req.id);
+    setRequests((prev) => prev.filter((r) => r.id !== req.id));
+  }
+
   async function acceptRequest(req: FriendRequest) {
     await supabase
       .from('friend_requests')
@@ -310,22 +325,25 @@ export default function PerformanceScreen() {
               </li>
             ))}
           </ul>
-          {leaderboard.length > 15 && !showAllLeaderboard && (
-            <button className={styles.showMoreButton} onClick={() => setShowAllLeaderboard(true)}>
-              Vis flere ({leaderboard.length - 15} flere)
+          {leaderboard.length > 15 && (
+            <button className={styles.showMoreButton} onClick={() => setShowAllLeaderboard((v) => !v)}>
+              {showAllLeaderboard ? 'Vis mindre' : `Vis flere (${leaderboard.length - 15} flere)`}
             </button>
           )}
         </section>
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Notifikationer</h2>
-          {requests.length === 0 && activityNotifs.length === 0 ? (
-            <p className={styles.emptyNotifications}>Ingen nye notifikationer</p>
-          ) : (() => {
+          {(() => {
             const allNotifs = [
               ...requests.map((req) => ({ id: req.id, type: 'request' as const, req })),
-              ...activityNotifs.map((n) => ({ id: n.id, type: 'activity' as const, n })),
+              ...activityNotifs
+                .filter((n) => !dismissedIds.has(n.id))
+                .map((n) => ({ id: n.id, type: 'activity' as const, n })),
             ];
+            if (allNotifs.length === 0) {
+              return <p className={styles.emptyNotifications}>Ingen nye notifikationer</p>;
+            }
             const visible = showAllNotifs ? allNotifs : allNotifs.slice(0, 3);
             return (
               <>
@@ -335,9 +353,12 @@ export default function PerformanceScreen() {
                       <span className={styles.notificationText}>
                         {item.req.from_username} tilføjede dig
                       </span>
-                      <button className={styles.acceptButton} onClick={() => acceptRequest(item.req)}>
-                        Tilføj
-                      </button>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <button className={styles.acceptButton} onClick={() => acceptRequest(item.req)}>
+                          Tilføj
+                        </button>
+                        <button className={styles.dismissButton} onClick={() => dismissRequest(item.req)}>✕</button>
+                      </div>
                     </div>
                   ) : (
                     <div key={item.id} className={styles.notificationRow}>
@@ -346,12 +367,13 @@ export default function PerformanceScreen() {
                           ? `${item.n.from_username} likede din ${item.n.activity_name}`
                           : `${item.n.from_username} kommenterede din ${item.n.activity_name}: "${item.n.body}"`}
                       </span>
+                      <button className={styles.dismissButton} onClick={() => dismissNotif(item.id)}>✕</button>
                     </div>
                   )
                 )}
-                {allNotifs.length > 3 && !showAllNotifs && (
-                  <button className={styles.showMoreButton} onClick={() => setShowAllNotifs(true)}>
-                    Vis flere ({allNotifs.length - 3} flere)
+                {allNotifs.length > 3 && (
+                  <button className={styles.showMoreButton} onClick={() => setShowAllNotifs((v) => !v)}>
+                    {showAllNotifs ? 'Vis mindre' : `Vis flere (${allNotifs.length - 3} flere)`}
                   </button>
                 )}
               </>

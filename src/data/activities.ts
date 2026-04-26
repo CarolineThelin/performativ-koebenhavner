@@ -29,7 +29,7 @@ export const categories: Category[] = [
         ],
       },
       {
-        name: 'Fastelavnsbolle',
+        name: 'Bagværk',
         points: 10,
         extras: [
           { name: 'Juno', points: 5 },
@@ -179,6 +179,7 @@ export const categories: Category[] = [
     name: 'Main Character Moments',
     activities: [
       { name: 'Solnedgang på Dronning Louises Bro', points: 10 },
+      { name: 'Arbejde/studere på en café', points: 10 },
       { name: 'Læs bog på offentlig bænk', points: 10 },
       { name: 'Skrive dagbog på cafe', points: 10 },
       { name: 'En tur på en omnium', points: 10 },

@@ -70,6 +70,15 @@ export const categories: Category[] = [
         ],
       },
       { name: 'Kombucha', points: 10 },
+      { name: 'Mate mate', points: 10, extras: [] },
+      {
+        name: 'Øl',
+        points: 10,
+        extras: [
+          { name: 'IPA', points: 5 },
+          { name: 'Sour', points: 5 },
+        ],
+      },
       {
         name: 'Matcha',
         points: 10,
@@ -97,6 +106,7 @@ export const categories: Category[] = [
           { name: 'Vermouth Tonic', points: 5 },
           { name: 'Amaretto sour', points: 5 },
           { name: 'Dirty Martini', points: 5 },
+          { name: 'Mate vodka', points: 5 },
         ],
       },
     ],

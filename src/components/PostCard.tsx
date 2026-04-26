@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 import styles from '../screens/ActivityScreen.module.css';
 import avatarIcon from '../../assets/icons/profil.svg';
 import likeIcon from '../../assets/icons/like.svg';
@@ -82,6 +83,25 @@ export default function PostCard({
   const navigate = useNavigate();
   const isOwn = post.user_id === currentUserId;
   const [confirmDeleteCommentId, setConfirmDeleteCommentId] = useState<string | null>(null);
+  const [likers, setLikers] = useState<string[]>([]);
+  const [showLikersModal, setShowLikersModal] = useState(false);
+
+  async function handleLikeClick() {
+    if (isOwn) {
+      const { data } = await supabase
+        .from('activity_likes')
+        .select('user_id, profiles(username)')
+        .eq('activity_id', post.id);
+      const names = (data ?? []).map((row: { profiles: { username: string }[] | null }) => {
+        const p = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+        return (p as { username: string } | null)?.username ?? 'Ukendt';
+      });
+      setLikers(names);
+      setShowLikersModal(true);
+    } else {
+      onLike();
+    }
+  }
 
   return (
     <>
@@ -177,7 +197,7 @@ export default function PostCard({
           </button>
           <button
             className={`${styles.likeButton} ${post.liked_by_me ? styles.liked : ''}`}
-            onClick={onLike}
+            onClick={handleLikeClick}
           >
             <img src={likeIcon} alt="Like" className={styles.likeIcon} />
             <span className={styles.likeCount}>{post.likes}</span>
@@ -193,7 +213,7 @@ export default function PostCard({
                 <span className={styles.commentUsername}>{comment.username}</span>
                 <span className={styles.commentBody}>{comment.body}</span>
               </div>
-              {comment.user_id === currentUserId && (
+              {(comment.user_id === currentUserId || post.user_id === currentUserId) && (
                 <button className={styles.commentDelete} onClick={() => setConfirmDeleteCommentId(comment.id)}>✕</button>
               )}
             </div>
@@ -211,6 +231,26 @@ export default function PostCard({
         </div>
       )}
     </article>
+
+    {showLikersModal && (
+      <div className={styles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) setShowLikersModal(false); }}>
+        <div className={styles.modalCard}>
+          <p className={styles.modalTitle}>
+            {likers.length === 0 ? 'Ingen likes endnu' : `${post.likes} ${post.likes === 1 ? 'like' : 'likes'}`}
+          </p>
+          {likers.length > 0 && (
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {likers.map((name, i) => (
+                <li key={i} style={{ fontFamily: 'var(--font-body)', fontSize: 16, color: 'var(--color-text)', fontWeight: 600 }}>
+                  {name}
+                </li>
+              ))}
+            </ul>
+          )}
+          <button className={styles.modalCancel} onClick={() => setShowLikersModal(false)}>Luk</button>
+        </div>
+      </div>
+    )}
 
     {confirmDeleteCommentId && (
       <div className={styles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) setConfirmDeleteCommentId(null); }}>

@@ -32,14 +32,15 @@
 }
 
 .backButtonContent {
-  font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--color-primary);
   background: none;
   border: none;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-primary);
   cursor: pointer;
-  padding: 12px 0 4px;
+  padding: 0;
+  text-align: left;
 }
 
 .headerTitle {

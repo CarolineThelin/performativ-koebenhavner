@@ -55,6 +55,7 @@ export default function ActivityScreen() {
   const [editBio, setEditBio] = useState('');
   const [editOpenCategory, setEditOpenCategory] = useState<string | null>(null);
   const [confirmDeletePost, setConfirmDeletePost] = useState<Post | null>(null);
+  const [confirmDeleteComment, setConfirmDeleteComment] = useState<{ postId: string; commentId: string } | null>(null);
   const [expandedComments, setExpandedComments] = useState<string | null>(null);
   const [commentsMap, setCommentsMap] = useState<Record<string, Comment[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
@@ -362,8 +363,8 @@ export default function ActivityScreen() {
                       <span className={styles.commentUsername}>{comment.username}</span>
                       <span className={styles.commentBody}>{comment.body}</span>
                     </div>
-                    {comment.user_id === currentUserId && (
-                      <button className={styles.commentDelete} onClick={() => deleteComment(post.id, comment.id)}>✕</button>
+                    {(comment.user_id === currentUserId || post.user_id === currentUserId) && (
+                      <button className={styles.commentDelete} onClick={() => setConfirmDeleteComment({ postId: post.id, commentId: comment.id })}>✕</button>
                     )}
                   </div>
                 ))}
@@ -502,6 +503,23 @@ export default function ActivityScreen() {
               })()}
             >
               Gem
+            </button>
+          </div>
+        </div>
+      )}
+      {confirmDeleteComment && (
+        <div className={styles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) setConfirmDeleteComment(null); }}>
+          <div className={styles.modalCard}>
+            <p className={styles.modalTitle}>Slet kommentar?</p>
+            <p className={styles.confirmText}>Er du sikker på at du vil slette denne kommentar?</p>
+            <button
+              className={`${styles.modalSave} ${styles.modalDanger}`}
+              onClick={() => { deleteComment(confirmDeleteComment.postId, confirmDeleteComment.commentId); setConfirmDeleteComment(null); }}
+            >
+              Ja, slet kommentar
+            </button>
+            <button className={styles.modalCancel} onClick={() => setConfirmDeleteComment(null)}>
+              Annuller
             </button>
           </div>
         </div>

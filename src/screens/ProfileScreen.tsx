@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { categories } from '../data/activities';
 import TabBar from '../components/TabBar';
 import PostCard, { type Post, type Comment } from '../components/PostCard';
 import styles from './ProfileScreen.module.css';
@@ -51,6 +52,11 @@ export default function ProfileScreen() {
   const [commentsMap, setCommentsMap] = useState<Record<string, Comment[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [confirmDeletePost, setConfirmDeletePost] = useState<Post | null>(null);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [editActivityKey, setEditActivityKey] = useState('');
+  const [editExtras, setEditExtras] = useState<string[]>([]);
+  const [editBio, setEditBio] = useState('');
+  const [editOpenCategory, setEditOpenCategory] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -193,6 +199,38 @@ export default function ProfileScreen() {
     setOpenMenuId(null);
   }
 
+  function openEdit(post: Post) {
+    setEditingPost(post);
+    setEditActivityKey(post.activity_name);
+    setEditExtras(post.extras ?? []);
+    setEditBio(post.bio ?? '');
+    setEditOpenCategory(null);
+    setOpenMenuId(null);
+  }
+
+  async function saveEdit() {
+    if (!editingPost) return;
+    const selectedActivity = categories.flatMap((c) => c.activities).find((a) => a.name === editActivityKey);
+    const extraPoints = editExtras.reduce((sum, extraName) => {
+      const extra = selectedActivity?.extras?.find((e) => e.name === extraName);
+      return sum + (extra?.points ?? 0);
+    }, 0);
+    const updates: Record<string, unknown> = { bio: editBio.trim() || null, extras: editExtras };
+    if (selectedActivity) {
+      updates.activity_name = selectedActivity.name;
+      updates.points = selectedActivity.points + extraPoints;
+    }
+    await supabase.from('user_activities').update(updates).eq('id', editingPost.id);
+    setOwnPosts((prev) => prev.map((p) => p.id === editingPost.id ? {
+      ...p,
+      activity_name: (updates.activity_name as string) ?? p.activity_name,
+      points: (updates.points as number) ?? p.points,
+      extras: editExtras,
+      bio: updates.bio as string | null,
+    } : p));
+    setEditingPost(null);
+  }
+
   const currentLevel = getCurrentLevel(weeklyGain);
   const nextLevel = getNextLevel(weeklyGain);
   const progress = getLevelProgress(weeklyGain);
@@ -294,6 +332,7 @@ export default function ProfileScreen() {
                 onCommentChange={(val) => setCommentInputs((prev) => ({ ...prev, [post.id]: val }))}
                 onCommentSubmit={() => addComment(post)}
                 onCommentDelete={(commentId) => deleteComment(post.id, commentId)}
+                onEdit={() => openEdit(post)}
                 onDelete={() => { setConfirmDeletePost(post); setOpenMenuId(null); }}
                 onPhotoUpload={(file) => handlePhotoUpload(post, file)}
                 onPhotoDelete={() => handlePhotoDelete(post)}
@@ -317,6 +356,99 @@ export default function ProfileScreen() {
             </button>
             <button className={feedStyles.modalCancel} onClick={() => setConfirmDeletePost(null)}>
               Annuller
+            </button>
+          </div>
+        </div>
+      )}
+
+      {editingPost && (
+        <div className={feedStyles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) setEditingPost(null); }}>
+          <div className={feedStyles.modalCard}>
+            <p className={feedStyles.modalTitle}>Rediger aktivitet</p>
+            <textarea
+              className={feedStyles.modalTextarea}
+              placeholder="Tilføj en beskrivelse..."
+              value={editBio}
+              onChange={(e) => setEditBio(e.target.value)}
+              rows={3}
+              autoFocus
+            />
+            <div className={feedStyles.editActivityList}>
+              {categories.map((cat) => (
+                <div key={cat.name}>
+                  <button
+                    className={feedStyles.editCategoryRow}
+                    onClick={() => setEditOpenCategory(editOpenCategory === cat.name ? null : cat.name)}
+                  >
+                    <span className={feedStyles.editCategoryName}>{cat.name}</span>
+                    <span className={editOpenCategory === cat.name ? feedStyles.editIconOpen : feedStyles.editIcon}>+</span>
+                  </button>
+                  <div className={feedStyles.editDivider} />
+                  {editOpenCategory === cat.name && (
+                    <ul className={feedStyles.editActivities}>
+                      {cat.activities.map((act) => {
+                        const selected = editActivityKey === act.name;
+                        return (
+                          <li key={act.name}>
+                            <button
+                              className={feedStyles.editActivityRow}
+                              onClick={() => { setEditActivityKey(act.name); setEditExtras([]); }}
+                            >
+                              <span className={`${feedStyles.editCheckbox} ${selected ? feedStyles.editChecked : ''}`}>
+                                {selected && <span className={feedStyles.editCheckmark}>✓</span>}
+                              </span>
+                              <span className={feedStyles.editActivityName}>{act.name}</span>
+                              <span className={feedStyles.editPoints}>{act.points > 0 ? `+${act.points}` : `${act.points}`}</span>
+                            </button>
+                            {selected && act.extras && act.extras.length > 0 && (
+                              <>
+                                {editExtras.length === 0 && (
+                                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#c0392b', padding: '4px 0 4px 32px', margin: 0 }}>
+                                    Vælg mindst én underkategori
+                                  </p>
+                                )}
+                                <ul className={feedStyles.editExtras}>
+                                  {act.extras.map((extra) => {
+                                    const checked = editExtras.includes(extra.name);
+                                    return (
+                                      <li key={extra.name}>
+                                        <button
+                                          className={feedStyles.editActivityRow}
+                                          onClick={() => setEditExtras((prev) =>
+                                            checked ? prev.filter((e) => e !== extra.name) : [...prev, extra.name]
+                                          )}
+                                        >
+                                          <span className={`${feedStyles.editCheckbox} ${checked ? feedStyles.editChecked : ''}`}>
+                                            {checked && <span className={feedStyles.editCheckmark}>✓</span>}
+                                          </span>
+                                          <span className={feedStyles.editExtraName}>{extra.name}</span>
+                                          {extra.points !== 0 && (
+                                            <span className={feedStyles.editPoints}>{extra.points > 0 ? `+${extra.points}` : `${extra.points}`}</span>
+                                          )}
+                                        </button>
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
+                              </>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button
+              className={feedStyles.modalSave}
+              onClick={saveEdit}
+              disabled={(() => {
+                const act = categories.flatMap((c) => c.activities).find((a) => a.name === editActivityKey);
+                return !!(act?.extras?.length && editExtras.length === 0);
+              })()}
+            >
+              Gem
             </button>
           </div>
         </div>

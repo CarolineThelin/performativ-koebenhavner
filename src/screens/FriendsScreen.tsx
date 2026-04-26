@@ -103,6 +103,11 @@ export default function FriendsScreen() {
     load();
   }
 
+  async function rejectRequest(req: FriendRequest) {
+    await supabase.from('friend_requests').delete().eq('id', req.id);
+    setRequests((prev) => prev.filter((r) => r.id !== req.id));
+  }
+
   async function removeFriend(friendId: string) {
     await supabase.from('friendships').delete().match({ user_id: currentUserId, friend_id: friendId });
     await supabase.from('friendships').delete().match({ user_id: friendId, friend_id: currentUserId });
@@ -148,9 +153,14 @@ export default function FriendsScreen() {
             {requests.map((req) => (
               <div key={req.id} className={styles.requestRow}>
                 <span className={styles.requestName}>{req.from_username} vil være din ven</span>
-                <button className={styles.acceptButton} onClick={() => acceptRequest(req)}>
-                  Tilføj
-                </button>
+                <div className={styles.requestActions}>
+                  <button className={styles.acceptButton} onClick={() => acceptRequest(req)}>
+                    Tilføj
+                  </button>
+                  <button className={styles.rejectButton} onClick={() => rejectRequest(req)}>
+                    ✕
+                  </button>
+                </div>
               </div>
             ))}
           </section>

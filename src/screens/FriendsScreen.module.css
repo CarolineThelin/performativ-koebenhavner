@@ -132,6 +132,12 @@
   color: var(--color-text);
 }
 
+.requestActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .acceptButton {
   font-family: var(--font-body);
   font-weight: 600;
@@ -142,6 +148,27 @@
   border-radius: var(--radius-button);
   padding: 8px 16px;
   cursor: pointer;
+}
+
+.rejectButton {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--color-text-muted);
+  background: none;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rejectButton:hover {
+  color: #c0392b;
+  border-color: #c0392b;
 }
 
 .friendList {

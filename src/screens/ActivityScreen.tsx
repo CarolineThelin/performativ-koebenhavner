@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { categories } from '../data/activities';
 import TabBar from '../components/TabBar';
@@ -43,6 +44,7 @@ function formatDate(iso: string) {
 }
 
 export default function ActivityScreen() {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -250,15 +252,25 @@ export default function ActivityScreen() {
         {posts.map((post) => (
           <article key={post.id} className={styles.post}>
             <div className={styles.postHeader}>
-              <div className={styles.avatar}>
+              <button
+                className={styles.avatar}
+                onClick={() => post.user_id !== currentUserId && navigate(`/bruger/${post.user_id}`)}
+                style={{ cursor: post.user_id !== currentUserId ? 'pointer' : 'default', background: 'none', border: 'none', padding: 0 }}
+              >
                 {avatarMap[post.user_id] ? (
                   <img src={avatarMap[post.user_id]} alt="" className={styles.avatarPhoto} />
                 ) : (
                   <img src={avatarIcon} alt="" className={styles.avatarIcon} />
                 )}
-              </div>
+              </button>
               <div className={styles.postMeta}>
-                <span className={styles.postUsername}>{post.username}</span>
+                <span
+                  className={styles.postUsername}
+                  onClick={() => post.user_id !== currentUserId && navigate(`/bruger/${post.user_id}`)}
+                  style={{ cursor: post.user_id !== currentUserId ? 'pointer' : 'default' }}
+                >
+                  {post.username}
+                </span>
                 <span className={styles.postDate}>{formatDate(post.created_at)}</span>
               </div>
               {post.user_id === currentUserId && (

@@ -141,6 +141,14 @@
 }
 
 /* Extras */
+.extrasRequired {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: #c0392b;
+  padding: 4px 0 4px 38px;
+  margin: 0;
+}
+
 .extraList {
   list-style: none;
   padding: 0 0 4px 38px;

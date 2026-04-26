@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import TabBar from '../components/TabBar';
+import PostCard, { type Post, type Comment } from '../components/PostCard';
 import styles from './ProfileScreen.module.css';
+import feedStyles from './ActivityScreen.module.css';
 import coupleImage from '../../assets/images/noerrebropar.png';
 import iconProfil from '../../assets/icons/profil.svg';
 
@@ -41,56 +43,78 @@ export default function ProfileScreen() {
   const [score, setScore] = useState(0);
   const [weeklyGain, setWeeklyGain] = useState(0);
   const [topActivities, setTopActivities] = useState<TopActivity[]>([]);
+  const [ownPosts, setOwnPosts] = useState<Post[]>([]);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userId, setUserId] = useState('');
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [expandedComments, setExpandedComments] = useState<string | null>(null);
+  const [commentsMap, setCommentsMap] = useState<Record<string, Comment[]>>({});
+  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+  const [confirmDeletePost, setConfirmDeletePost] = useState<Post | null>(null);
 
-  useEffect(() => {
-    async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+  const load = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-      setUsername(user.user_metadata?.username ?? user.email ?? '');
-      setUserId(user.id);
+    setUsername(user.user_metadata?.username ?? user.email ?? '');
+    setUserId(user.id);
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('avatar_url')
-        .eq('id', user.id)
-        .single();
-      if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('avatar_url')
+      .eq('id', user.id)
+      .single();
+    if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
 
-      const oneMonthAgo = new Date();
-      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-      const { data: allActivities } = await supabase
-        .from('user_activities')
-        .select('activity_name, points, created_at')
-        .eq('user_id', user.id);
+    const { data: allActivities } = await supabase
+      .from('user_activities')
+      .select('*, activity_likes(user_id), activity_comments(id)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
 
-      if (!allActivities) return;
+    if (!allActivities) return;
 
-      const totalScore = allActivities.reduce((sum, a) => sum + a.points, 0);
-      setScore(totalScore);
+    const totalScore = allActivities.reduce((sum, a) => sum + a.points, 0);
+    setScore(totalScore);
 
-      const monthlyActivities = allActivities.filter(
-        (a) => new Date(a.created_at) >= oneMonthAgo
-      );
-      const monthlyScore = monthlyActivities.reduce((sum, a) => sum + a.points, 0);
-      setWeeklyGain(monthlyScore);
+    const monthlyScore = allActivities
+      .filter((a) => new Date(a.created_at) >= oneMonthAgo)
+      .reduce((sum, a) => sum + a.points, 0);
+    setWeeklyGain(monthlyScore);
 
-      const grouped: Record<string, number> = {};
-      for (const a of allActivities) {
-        grouped[a.activity_name] = (grouped[a.activity_name] ?? 0) + a.points;
-      }
-      const sorted = Object.entries(grouped)
+    const grouped: Record<string, number> = {};
+    for (const a of allActivities) {
+      grouped[a.activity_name] = (grouped[a.activity_name] ?? 0) + a.points;
+    }
+    setTopActivities(
+      Object.entries(grouped)
         .map(([name, points]) => ({ name, points }))
         .sort((a, b) => b.points - a.points)
-        .slice(0, 5);
-      setTopActivities(sorted);
-    }
+        .slice(0, 5)
+    );
 
-    load();
+    setOwnPosts(
+      allActivities.map((a) => ({
+        id: a.id,
+        user_id: a.user_id,
+        username: a.username ?? user.user_metadata?.username ?? user.email ?? '',
+        activity_name: a.activity_name,
+        extras: a.extras ?? [],
+        points: a.points,
+        created_at: a.created_at,
+        image_url: a.image_url ?? null,
+        bio: a.bio ?? null,
+        likes: a.activity_likes?.length ?? 0,
+        liked_by_me: a.activity_likes?.some((l: { user_id: string }) => l.user_id === user.id) ?? false,
+        comment_count: a.activity_comments?.length ?? 0,
+      }))
+    );
   }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   async function handleAvatarUpload(file: File) {
     const path = `${userId}/avatar`;
@@ -99,6 +123,74 @@ export default function ProfileScreen() {
     const url = `${urlData.publicUrl}?t=${Date.now()}`;
     await supabase.from('profiles').upsert({ id: userId, avatar_url: url });
     setAvatarUrl(url);
+  }
+
+  async function toggleLike(post: Post) {
+    if (!userId) return;
+    if (post.liked_by_me) {
+      await supabase.from('activity_likes').delete().eq('activity_id', post.id).eq('user_id', userId);
+    } else {
+      await supabase.from('activity_likes').insert({ activity_id: post.id, user_id: userId });
+    }
+    setOwnPosts((prev) => prev.map((p) =>
+      p.id === post.id ? { ...p, liked_by_me: !p.liked_by_me, likes: p.likes + (p.liked_by_me ? -1 : 1) } : p
+    ));
+  }
+
+  async function toggleComments(postId: string) {
+    if (expandedComments === postId) { setExpandedComments(null); return; }
+    setExpandedComments(postId);
+    if (commentsMap[postId]) return;
+    const { data } = await supabase
+      .from('activity_comments')
+      .select('id, user_id, username, body, created_at')
+      .eq('activity_id', postId)
+      .order('created_at', { ascending: true });
+    setCommentsMap((prev) => ({ ...prev, [postId]: data ?? [] }));
+  }
+
+  async function addComment(post: Post) {
+    const body = commentInputs[post.id]?.trim();
+    if (!body || !userId) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    const uname = user?.user_metadata?.username ?? user?.email ?? '';
+    const { data: newComment } = await supabase
+      .from('activity_comments')
+      .insert({ activity_id: post.id, user_id: userId, username: uname, body })
+      .select('id, user_id, username, body, created_at')
+      .single();
+    if (newComment) {
+      setCommentsMap((prev) => ({ ...prev, [post.id]: [...(prev[post.id] ?? []), newComment] }));
+      setOwnPosts((prev) => prev.map((p) => p.id === post.id ? { ...p, comment_count: p.comment_count + 1 } : p));
+      setCommentInputs((prev) => ({ ...prev, [post.id]: '' }));
+    }
+  }
+
+  async function deleteComment(postId: string, commentId: string) {
+    await supabase.from('activity_comments').delete().eq('id', commentId);
+    setCommentsMap((prev) => ({ ...prev, [postId]: prev[postId].filter((c) => c.id !== commentId) }));
+    setOwnPosts((prev) => prev.map((p) => p.id === postId ? { ...p, comment_count: p.comment_count - 1 } : p));
+  }
+
+  async function handleDeletePost() {
+    if (!confirmDeletePost) return;
+    await supabase.from('user_activities').delete().eq('id', confirmDeletePost.id);
+    setOwnPosts((prev) => prev.filter((p) => p.id !== confirmDeletePost.id));
+    setConfirmDeletePost(null);
+  }
+
+  async function handlePhotoUpload(post: Post, file: File) {
+    const path = `${post.user_id}/${Date.now()}_${file.name}`;
+    await supabase.storage.from('activity-images').upload(path, file);
+    const { data: urlData } = supabase.storage.from('activity-images').getPublicUrl(path);
+    await supabase.from('user_activities').update({ image_url: urlData.publicUrl }).eq('id', post.id);
+    setOwnPosts((prev) => prev.map((p) => p.id === post.id ? { ...p, image_url: urlData.publicUrl } : p));
+  }
+
+  async function handlePhotoDelete(post: Post) {
+    await supabase.from('user_activities').update({ image_url: null }).eq('id', post.id);
+    setOwnPosts((prev) => prev.map((p) => p.id === post.id ? { ...p, image_url: null } : p));
+    setOpenMenuId(null);
   }
 
   const currentLevel = getCurrentLevel(weeklyGain);
@@ -148,7 +240,6 @@ export default function ProfileScreen() {
               ? `Du er ${pointsToNext} point fra næste niveau`
               : 'Du er på det højeste niveau!'}
           </p>
-
           <div className={styles.progressContainer}>
             <img
               src={coupleImage}
@@ -161,15 +252,13 @@ export default function ProfileScreen() {
             </div>
             <div className={styles.progressLabels}>
               <span className={styles.progressLabel}>{currentLevel.name}</span>
-              {nextLevel && (
-                <span className={styles.progressLabel}>{nextLevel.name}</span>
-              )}
+              {nextLevel && <span className={styles.progressLabel}>{nextLevel.name}</span>}
             </div>
           </div>
         </section>
 
         <section className={styles.activitiesSection}>
-          <h2 className={styles.activitiesTitle}>Dine bedste performances:</h2>
+          <h2 className={styles.activitiesTitle}>Dine bedste performances</h2>
           {topActivities.length === 0 ? (
             <p className={styles.emptyActivities}>Ingen aktiviteter endnu</p>
           ) : (
@@ -177,16 +266,61 @@ export default function ProfileScreen() {
               {topActivities.map((activity, i) => (
                 <li key={i} className={styles.activityItem}>
                   <span className={styles.activityName}>{activity.name}</span>
-                  <span className={styles.activityPoints}>+ {activity.points}</span>
+                  <span className={styles.activityPoints}>+{activity.points}</span>
                 </li>
               ))}
             </ol>
           )}
         </section>
-
       </main>
 
+      <section className={styles.feedSection}>
+        <h2 className={styles.feedTitle}>Mine aktiviteter</h2>
+        {ownPosts.length === 0 ? (
+          <p className={styles.emptyActivities} style={{ padding: '0 16px 24px' }}>Ingen aktiviteter endnu</p>
+        ) : (
+          <div className={feedStyles.feed}>
+            {ownPosts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                currentUserId={userId}
+                avatarUrl={avatarUrl ?? undefined}
+                comments={commentsMap[post.id] ?? []}
+                commentInput={commentInputs[post.id] ?? ''}
+                expandedComments={expandedComments === post.id}
+                onLike={() => toggleLike(post)}
+                onToggleComments={() => toggleComments(post.id)}
+                onCommentChange={(val) => setCommentInputs((prev) => ({ ...prev, [post.id]: val }))}
+                onCommentSubmit={() => addComment(post)}
+                onCommentDelete={(commentId) => deleteComment(post.id, commentId)}
+                onDelete={() => { setConfirmDeletePost(post); setOpenMenuId(null); }}
+                onPhotoUpload={(file) => handlePhotoUpload(post, file)}
+                onPhotoDelete={() => handlePhotoDelete(post)}
+                menuOpen={openMenuId === post.id}
+                onMenuToggle={() => setOpenMenuId(openMenuId === post.id ? null : post.id)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
       <TabBar />
+
+      {confirmDeletePost && (
+        <div className={feedStyles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) setConfirmDeletePost(null); }}>
+          <div className={feedStyles.modalCard}>
+            <p className={feedStyles.modalTitle}>Oh no!</p>
+            <p className={feedStyles.confirmText}>Nu mister du performativitetspoint. Er du sikker på at du vil slette denne aktivitet?</p>
+            <button className={`${feedStyles.modalSave} ${feedStyles.modalDanger}`} onClick={handleDeletePost}>
+              Ja, slet aktivitet
+            </button>
+            <button className={feedStyles.modalCancel} onClick={() => setConfirmDeletePost(null)}>
+              Annuller
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

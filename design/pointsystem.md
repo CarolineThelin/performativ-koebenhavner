@@ -20,12 +20,16 @@
 - Surdej
 - Gammel knas
 - Pisket smør
+- Plain
 
 **Fastelavnsbolle** giver 10 point. Følgende steder giver +5 ekstra:
 - Juno
 - Anderson
 - Hart
 - La Glace
+- Plain
+
+**Kardemommesnurre** giver 10 point
 
 **Føtex** giver **-5 point**
 
@@ -50,6 +54,7 @@
 - Reformer
 - Heated
 - Lagree
+- Måtte
 
 **Sauna** giver 10 point. Følgende giver +5 ekstra:
 - Coldplunge
@@ -94,7 +99,7 @@ Følgende giver 10 point:
 - Solnedgang på Dronning Louises Bro
 - Læst bog på offentlig bænk
 - Skrive dagbog på cafe
-- Omnium
+- En ur på en omnium
 
 **Tanning** giver 10 point. Følgende steder giver +5 ekstra:
 - La Banchina
@@ -110,3 +115,4 @@ Følgende giver 10 point:
 - Sigurdsgade
 - Kødbyen
 - Blågårdsgade
+- Alexandra Hus

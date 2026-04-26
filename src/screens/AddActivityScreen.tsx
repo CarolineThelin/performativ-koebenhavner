@@ -134,6 +134,10 @@ export default function AddActivityScreen() {
 
   const totalPoints = calcTotalPoints();
 
+  const canSubmit = selections.length > 0 && selections.every((s) =>
+    !s.activity.extras?.length || s.selectedExtras.length > 0
+  );
+
   return (
     <div className={styles.screen}>
       <header className={styles.header}>
@@ -181,6 +185,10 @@ export default function AddActivityScreen() {
                           </span>
                         </button>
 
+                        {selected && (act.extras?.length ?? 0) > 0 && selections.find((s) => s.activity.name === act.name)?.selectedExtras.length === 0 && (
+                          <p className={styles.extrasRequired}>Vælg mindst én underkategori</p>
+                        )}
+
                         {extrasOpen && act.extras && (
                           <ul className={styles.extraList}>
                             {act.extras.map((extra) => {
@@ -218,7 +226,7 @@ export default function AddActivityScreen() {
             <button
               className={styles.submitButton}
               onClick={handleSubmit}
-              disabled={saving}
+              disabled={saving || !canSubmit}
             >
               {saving ? 'Gemmer...' : `Tilføj ${totalPoints > 0 ? `+${totalPoints}` : totalPoints} point`}
             </button>

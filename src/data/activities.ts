@@ -25,6 +25,7 @@ export const categories: Category[] = [
           { name: 'Surdej', points: 5 },
           { name: 'Gammel knas', points: 5 },
           { name: 'Pisket smør', points: 5 },
+          { name: 'Plain', points: 0 },
         ],
       },
       {
@@ -35,8 +36,14 @@ export const categories: Category[] = [
           { name: 'Anderson', points: 5 },
           { name: 'Hart', points: 5 },
           { name: 'La Glace', points: 5 },
+          { name: 'Plain', points: 0 },
           { name: 'Føtex', points: -5 },
         ],
+      },
+      {
+        name: 'Kardemommesnurre',
+        points: 10,
+        extras: [],
       },
     ],
   },
@@ -113,6 +120,7 @@ export const categories: Category[] = [
           { name: 'Reformer', points: 5 },
           { name: 'Heated', points: 5 },
           { name: 'Lagree', points: 5 },
+          { name: 'Måtte', points: 5 },
         ],
       },
       {
@@ -160,6 +168,7 @@ export const categories: Category[] = [
           { name: 'Sigurdsgade', points: 5 },
           { name: 'Kødbyen', points: 5 },
           { name: 'Blågårdsgade', points: 5 },
+          { name: 'Alexandra Hus', points: 5 },
         ],
       },
     ],

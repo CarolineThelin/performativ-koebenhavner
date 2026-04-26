@@ -229,7 +229,7 @@ export default function ProfileScreen() {
               <button className={styles.settingsButton} onClick={() => navigate('/rediger-profil')}>⚙</button>
             </div>
             <p className={styles.score}>Performativitetsscore: {score}</p>
-            <p className={styles.weeklyGain}>Denne måned: +{weeklyGain}</p>
+            <p className={styles.weeklyGain}>De sidste 30 dage: +{weeklyGain}</p>
           </div>
         </section>
 

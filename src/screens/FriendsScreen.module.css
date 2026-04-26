@@ -1,0 +1,187 @@
+.screen {
+  width: 390px;
+  min-height: 100vh;
+  background: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 80px;
+}
+
+.header {
+  background: var(--color-primary);
+  padding: 20px 16px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headerTitle {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  color: var(--color-white);
+  letter-spacing: 1px;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.content {
+  flex: 1;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 20px;
+  color: #2E5C5C;
+}
+
+.input {
+  font-family: var(--font-body);
+  font-size: 15px;
+  background: rgba(97, 183, 183, 0.18);
+  border: none;
+  border-radius: 40px;
+  padding: 14px 18px;
+  outline: none;
+  color: var(--color-text);
+}
+
+.input::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.searchResults {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.resultRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 4px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.resultName {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--color-text);
+}
+
+.addButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.addIcon {
+  width: 24px;
+  height: 24px;
+  filter: invert(63%) sepia(26%) saturate(700%) hue-rotate(137deg) brightness(95%) contrast(90%);
+}
+
+.message {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-primary);
+}
+
+.requestRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.requestName {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.acceptButton {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-white);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-button);
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.friendList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.friendRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 4px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.friendName {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--color-text);
+}
+
+.removeButton {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  color: #aaa;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: var(--radius-button);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.emptyText {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.4);
+}

@@ -1,0 +1,308 @@
+.screen {
+  width: 390px;
+  min-height: 100vh;
+  background: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 80px;
+}
+
+.header {
+  background: var(--color-primary);
+  padding: 20px 16px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headerTitle {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  color: var(--color-white);
+  letter-spacing: 1px;
+}
+
+.content {
+  flex: 1;
+  padding: 24px 20px 0;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--color-text);
+  margin-bottom: 16px;
+}
+
+.divider {
+  height: 2px;
+  background: var(--color-primary);
+  margin-bottom: 0;
+}
+
+.categoryList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.categoryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 18px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.categoryName {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--color-text);
+}
+
+.categoryIcon {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 28px;
+  color: var(--color-text);
+  transition: transform 0.2s ease;
+  line-height: 1;
+}
+
+.categoryIcon.open {
+  transform: rotate(45deg);
+}
+
+/* Aktiviteter */
+.activityList {
+  list-style: none;
+  padding: 0 0 8px 0;
+  margin: 0;
+}
+
+.activityRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.checkbox {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid #000;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkbox.checked {
+  background: #FF7431;
+  border-color: #FF7431;
+}
+
+.checkmark {
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.activityName {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 17px;
+  color: var(--color-text);
+  flex: 1;
+}
+
+.points {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 16px;
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+
+/* Extras */
+.extraList {
+  list-style: none;
+  padding: 0 0 4px 38px;
+  margin: 0;
+}
+
+.extraRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.extraName {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 15px;
+  color: var(--color-text-muted);
+  flex: 1;
+}
+
+/* Submit */
+.submitArea {
+  position: sticky;
+  bottom: 88px;
+  padding: 16px 0;
+  background: var(--color-white);
+}
+
+.submitButton {
+  display: block;
+  width: 100%;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--color-white);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-button);
+  padding: 16px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.submitButton:hover {
+  opacity: 0.85;
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.savedMessage {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--color-primary);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+/* Kvalificer */
+.qualifySection {
+  margin-top: 24px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.qualifyTrigger {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--color-primary);
+  background: none;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-button);
+  padding: 12px 24px;
+  cursor: pointer;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalCard {
+  background: var(--color-white);
+  border-radius: 20px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+  padding: 28px 24px;
+  width: calc(390px - 40px);
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalTitle {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 20px;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.qualifyTextarea {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 15px;
+  background: rgba(97, 183, 183, 0.18);
+  border: none;
+  border-radius: 16px;
+  padding: 14px 16px;
+  outline: none;
+  resize: none;
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+.qualifyTextarea::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.qualifyButton {
+  width: 100%;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--color-white);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-button);
+  padding: 14px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.qualifyButton:hover {
+  opacity: 0.85;
+}
+
+.qualifyButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.qualifyMessage {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-primary);
+  text-align: center;
+}

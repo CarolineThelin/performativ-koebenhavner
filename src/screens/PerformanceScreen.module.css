@@ -1,0 +1,266 @@
+.screen {
+  width: 390px;
+  min-height: 100vh;
+  background: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 80px;
+}
+
+.header {
+  background: var(--color-primary);
+  padding: 20px 16px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headerTitle {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  color: var(--color-white);
+  letter-spacing: 1px;
+}
+
+.content {
+  flex: 1;
+  padding: 20px 20px 0;
+}
+
+/* Tilføj ven */
+.addFriendRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.myFriendsButton {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-primary);
+  background: none;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-button);
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.addFriendButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--color-text);
+}
+
+.addFriendIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: invert(63%) sepia(26%) saturate(700%) hue-rotate(137deg) brightness(95%) contrast(90%);
+}
+
+/* Modal overlay */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalCard {
+  background: var(--color-white);
+  border-radius: 20px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+  padding: 28px 24px;
+  width: calc(390px - 40px);
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalTitle {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.addFriendInput {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-body);
+  font-size: 15px;
+  background: rgba(97, 183, 183, 0.24);
+  border: none;
+  border-radius: 40px;
+  padding: 12px 18px;
+  outline: none;
+}
+
+.addFriendInput::placeholder {
+  color: rgba(0, 0, 0, 0.43);
+}
+
+.searchResults {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.foundUserRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 4px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.foundUsername {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--color-text);
+}
+
+.addFoundButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.addFoundIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: invert(63%) sepia(26%) saturate(700%) hue-rotate(137deg) brightness(95%) contrast(90%);
+}
+
+.addMessage {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-primary);
+  text-align: center;
+}
+
+/* Sektioner */
+.section {
+  margin-bottom: 48px;
+}
+
+.sectionTitle {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 22px;
+  color: #2E5C5C;
+  margin-bottom: 16px;
+}
+
+/* Notifikationer */
+.notificationRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.notificationText {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.acceptButton {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  color: #FF7431;
+  background: transparent;
+  border: 2px solid #FF7431;
+  border-radius: 40px;
+  padding: 6px 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Leaderboard */
+.leaderboard {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.leaderboardItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.leaderboardRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.leaderboardName {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 20px;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trophyIcon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  filter: invert(58%) sepia(76%) saturate(1000%) hue-rotate(340deg) brightness(103%);
+}
+
+.leaderboardScore {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 20px;
+  color: var(--color-text);
+}
+
+.barTrack {
+  height: 10px;
+  background: #E0E0E0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 5px;
+  transition: width 0.5s ease;
+}

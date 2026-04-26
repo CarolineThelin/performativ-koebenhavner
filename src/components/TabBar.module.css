@@ -1,0 +1,46 @@
+.tabBar {
+  position: fixed;
+  bottom: 0;
+  width: 390px;
+  height: 80px;
+  background: var(--color-white);
+  border-top: 0.5px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 100;
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: invert(63%) sepia(26%) saturate(700%) hue-rotate(137deg) brightness(95%) contrast(90%);
+}
+
+.active .icon {
+  filter: invert(58%) sepia(76%) saturate(1000%) hue-rotate(340deg) brightness(103%);
+}
+
+
+.label {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--color-primary);
+}
+
+.active .label {
+  color: #FF7431;
+}

@@ -1,0 +1,305 @@
+.screen {
+  width: 390px;
+  min-height: 100vh;
+  background: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 80px;
+}
+
+.header {
+  background: var(--color-primary);
+  padding: 20px 16px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headerTitle {
+  font-family: var(--font-heading);
+  font-size: 36px;
+  color: var(--color-white);
+  letter-spacing: 1px;
+}
+
+.editButton {
+  background: none;
+  border: none;
+  color: var(--color-white);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.settingsRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: -16px;
+}
+
+.settingsButton {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--color-primary);
+  padding: 0;
+  line-height: 1;
+}
+
+/* Brugerkort */
+.userCard {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: #D9D9D9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.avatarInput {
+  display: none;
+}
+
+.avatarIcon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.avatarPhoto {
+  width: 88px;
+  height: 88px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatarOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+  color: white;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.avatar:hover .avatarOverlay {
+  opacity: 1;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.usernameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.userName {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--color-text);
+}
+
+.usernamePencil {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--color-primary);
+  padding: 0;
+  line-height: 1;
+}
+
+.usernameEditRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.usernameInput {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 18px;
+  border: none;
+  border-bottom: 2px solid var(--color-primary);
+  outline: none;
+  color: var(--color-text);
+  background: transparent;
+  width: 130px;
+}
+
+.usernameSave {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--color-primary);
+  padding: 0;
+}
+
+.usernameCancel {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  color: #aaa;
+  padding: 0;
+}
+
+.score,
+.weeklyGain {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  color: #2E5C5C;
+}
+
+/* Niveau */
+.levelSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.levelTitle {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 22px;
+  color: #2E5C5C;
+}
+
+.levelSubtitle {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-text);
+  margin-bottom: 32px;
+}
+
+.progressContainer {
+  position: relative;
+}
+
+.progressImage {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  object-position: bottom;
+  bottom: 18px;
+  transition: left 0.3s ease;
+}
+
+.progressBar {
+  height: 14px;
+  background: #D9D9D9;
+  border-radius: 7px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 7px;
+  transition: width 0.5s ease;
+}
+
+.progressLabels {
+  display: flex;
+  justify-content: space-between;
+}
+
+.progressLabel {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 11px;
+  color: #2E5C5C;
+}
+
+/* Aktiviteter */
+.activitiesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activitiesTitle {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 20px;
+  color: #2E5C5C;
+}
+
+.activityList {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.activityItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  counter-increment: activity;
+}
+
+.activityName {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--color-text);
+}
+
+.activityItem:nth-child(1) .activityName::before { content: '1.  '; }
+.activityItem:nth-child(2) .activityName::before { content: '2.  '; }
+.activityItem:nth-child(3) .activityName::before { content: '3.  '; }
+.activityItem:nth-child(4) .activityName::before { content: '4.  '; }
+.activityItem:nth-child(5) .activityName::before { content: '5.  '; }
+
+.activityPoints {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--color-text);
+}
+
+.emptyActivities {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--color-text-muted);
+}

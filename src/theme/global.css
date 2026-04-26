@@ -1,0 +1,37 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-primary: #61B7B7;
+  --color-primary-light: rgba(97, 183, 183, 0.24);
+  --color-primary-border: #D9EEEE;
+  --color-text: #000000;
+  --color-text-muted: rgba(0, 0, 0, 0.43);
+  --color-white: #ffffff;
+  --font-heading: 'Archivo Black', sans-serif;
+  --font-body: 'Raleway', sans-serif;
+  --radius-input: 40px;
+  --radius-card: 20px;
+  --radius-button: 40px;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mobilvisning centreret på desktop */
+#root {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: #e0e0e0;
+}

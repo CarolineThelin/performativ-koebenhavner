@@ -10,6 +10,7 @@ import EditProfileScreen from './screens/EditProfileScreen';
 import FriendsScreen from './screens/FriendsScreen';
 import SplashScreen from './screens/SplashScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
+import UserProfileScreen from './screens/UserProfileScreen';
 import ResetPasswordScreen from './screens/ResetPasswordScreen';
 import { getSession } from './services/auth';
 import { supabase } from './lib/supabase';
@@ -108,6 +109,10 @@ function AuthRouter() {
         element={loggedIn ? <FriendsScreen /> : <Navigate to="/login" replace />}
       />
 
+      <Route
+        path="/bruger/:userId"
+        element={loggedIn ? <UserProfileScreen /> : <Navigate to="/login" replace />}
+      />
       <Route path="/" element={<Navigate to={loggedIn ? '/aktivitet' : '/login'} replace />} />
     </Routes>
   );

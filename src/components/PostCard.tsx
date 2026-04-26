@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from '../screens/ActivityScreen.module.css';
 import avatarIcon from '../../assets/icons/profil.svg';
 import likeIcon from '../../assets/icons/like.svg';
@@ -77,20 +79,33 @@ export default function PostCard({
   menuOpen,
   onMenuToggle,
 }: PostCardProps) {
+  const navigate = useNavigate();
   const isOwn = post.user_id === currentUserId;
+  const [confirmDeleteCommentId, setConfirmDeleteCommentId] = useState<string | null>(null);
 
   return (
+    <>
     <article className={styles.post}>
       <div className={styles.postHeader}>
-        <div className={styles.avatar}>
+        <button
+          className={styles.avatar}
+          onClick={() => !isOwn && navigate(`/bruger/${post.user_id}`)}
+          style={{ cursor: isOwn ? 'default' : 'pointer', background: 'none', border: 'none', padding: 0 }}
+        >
           {avatarUrl ? (
             <img src={avatarUrl} alt="" className={styles.avatarPhoto} />
           ) : (
             <img src={avatarIcon} alt="" className={styles.avatarIcon} />
           )}
-        </div>
+        </button>
         <div className={styles.postMeta}>
-          <span className={styles.postUsername}>{post.username}</span>
+          <span
+            className={styles.postUsername}
+            onClick={() => !isOwn && navigate(`/bruger/${post.user_id}`)}
+            style={{ cursor: isOwn ? 'default' : 'pointer' }}
+          >
+            {post.username}
+          </span>
           <span className={styles.postDate}>{formatDate(post.created_at)}</span>
         </div>
         {isOwn && onMenuToggle && (
@@ -179,7 +194,7 @@ export default function PostCard({
                 <span className={styles.commentBody}>{comment.body}</span>
               </div>
               {comment.user_id === currentUserId && (
-                <button className={styles.commentDelete} onClick={() => onCommentDelete(comment.id)}>✕</button>
+                <button className={styles.commentDelete} onClick={() => setConfirmDeleteCommentId(comment.id)}>✕</button>
               )}
             </div>
           ))}
@@ -196,5 +211,24 @@ export default function PostCard({
         </div>
       )}
     </article>
+
+    {confirmDeleteCommentId && (
+      <div className={styles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) setConfirmDeleteCommentId(null); }}>
+        <div className={styles.modalCard}>
+          <p className={styles.modalTitle}>Slet kommentar?</p>
+          <p className={styles.confirmText}>Er du sikker på at du vil slette denne kommentar?</p>
+          <button
+            className={`${styles.modalSave} ${styles.modalDanger}`}
+            onClick={() => { onCommentDelete(confirmDeleteCommentId); setConfirmDeleteCommentId(null); }}
+          >
+            Ja, slet kommentar
+          </button>
+          <button className={styles.modalCancel} onClick={() => setConfirmDeleteCommentId(null)}>
+            Annuller
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

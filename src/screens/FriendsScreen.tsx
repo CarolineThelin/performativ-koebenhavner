@@ -109,8 +109,24 @@ export default function FriendsScreen() {
   }
 
   async function removeFriend(friendId: string) {
-    await supabase.from('friendships').delete().match({ user_id: currentUserId, friend_id: friendId });
-    await supabase.from('friendships').delete().match({ user_id: friendId, friend_id: currentUserId });
+    const { error } = await supabase
+      .from('friendships')
+      .delete()
+      .eq('user_id', currentUserId)
+      .eq('friend_id', friendId);
+    if (error) {
+      console.error('Kunne ikke fjerne ven:', error.message);
+      return;
+    }
+    try {
+      await supabase
+        .from('friendships')
+        .delete()
+        .eq('user_id', friendId)
+        .eq('friend_id', currentUserId);
+    } catch {
+      // Den anden retning kan fejle pga. RLS — ignoreres
+    }
     setFriends((prev) => prev.filter((f) => f.id !== friendId));
   }
 
@@ -174,7 +190,9 @@ export default function FriendsScreen() {
             <ul className={styles.friendList}>
               {friends.map((f) => (
                 <li key={f.id} className={styles.friendRow}>
-                  <span className={styles.friendName}>{f.username}</span>
+                  <button className={styles.friendNameButton} onClick={() => navigate(`/bruger/${f.id}`)}>
+                    {f.username}
+                  </button>
                   <button className={styles.removeButton} onClick={() => removeFriend(f.id)}>
                     Fjern
                   </button>

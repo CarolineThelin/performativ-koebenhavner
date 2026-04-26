@@ -159,6 +159,7 @@ export const categories: Category[] = [
       { name: 'Læs bog på offentlig bænk', points: 10 },
       { name: 'Skrive dagbog på cafe', points: 10 },
       { name: 'En tur på en omnium', points: 10 },
+      { name: 'Gå en tur om søerne', points: 10 },
       {
         name: 'Tanning',
         points: 10,

@@ -20,11 +20,18 @@ function AuthRouter() {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
-    getSession().then((session) => {
-      setLoggedIn(!!session);
+    const isRecovery = window.location.hash.includes('type=recovery');
+
+    if (isRecovery) {
       setChecking(false);
-      if (session) navigate('/aktivitet');
-    });
+      navigate('/nyt-kodeord');
+    } else {
+      getSession().then((session) => {
+        setLoggedIn(!!session);
+        setChecking(false);
+        if (session) navigate('/aktivitet');
+      });
+    }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {

@@ -45,6 +45,16 @@ export const categories: Category[] = [
         points: 10,
         extras: [],
       },
+      {
+        name: 'Kebab på Nørrebro',
+        points: 10,
+        extras: [],
+      },
+      {
+        name: 'Avocadomad',
+        points: 10,
+        extras: [],
+      },
     ],
   },
   {

@@ -81,6 +81,7 @@ export const categories: Category[] = [
         extras: [
           { name: 'På havremælk', points: 5 },
           { name: 'Iced', points: 5 },
+          { name: 'Plain', points: 0 },
         ],
       },
       {

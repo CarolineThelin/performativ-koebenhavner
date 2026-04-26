@@ -176,6 +176,32 @@
   margin-bottom: 16px;
 }
 
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionHeader .sectionTitle {
+  margin-bottom: 0;
+}
+
+.clearButton {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.clearButton:hover {
+  color: #c0392b;
+}
+
 /* Notifikationer */
 .notificationRow {
   display: flex;

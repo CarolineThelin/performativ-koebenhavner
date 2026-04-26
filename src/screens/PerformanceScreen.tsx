@@ -216,6 +216,13 @@ export default function PerformanceScreen() {
     }
   }
 
+  function clearActivityNotifs() {
+    const ids = activityNotifs.map((n) => n.id);
+    const updated = new Set([...dismissedIds, ...ids]);
+    setDismissedIds(updated);
+    localStorage.setItem('dismissed_notifs', JSON.stringify([...updated]));
+  }
+
   function dismissNotif(id: string) {
     const updated = new Set(dismissedIds);
     updated.add(id);
@@ -334,7 +341,12 @@ export default function PerformanceScreen() {
         </section>
 
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Notifikationer</h2>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Notifikationer</h2>
+            {activityNotifs.filter((n) => !dismissedIds.has(n.id)).length > 0 && (
+              <button className={styles.clearButton} onClick={clearActivityNotifs}>Ryd</button>
+            )}
+          </div>
           {(() => {
             const allNotifs = [
               ...requests.map((req) => ({ id: req.id, type: 'request' as const, req })),

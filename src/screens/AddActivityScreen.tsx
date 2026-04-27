@@ -127,6 +127,7 @@ export default function AddActivityScreen() {
       const { data: { user } } = await supabase.auth.getUser();
       await supabase.from('activity_suggestions').insert({
         user_id: user?.id ?? null,
+        username: user?.user_metadata?.username ?? user?.email ?? null,
         suggestion: qualifyText.trim(),
       });
       setQualifyText('');

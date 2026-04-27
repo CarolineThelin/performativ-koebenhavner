@@ -219,7 +219,13 @@ export default function PostCard({
           {comments.map((comment) => (
             <div key={comment.id} className={styles.commentRow}>
               <div className={styles.commentContent}>
-                <span className={styles.commentUsername}>{comment.username}</span>
+                <button
+                  className={styles.commentUsername}
+                  onClick={() => navigate(`/bruger/${comment.user_id}`)}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+                >
+                  {comment.username}
+                </button>
                 <span className={styles.commentBody}>{comment.body}</span>
               </div>
               {(comment.user_id === currentUserId || post.user_id === currentUserId) && (

@@ -50,6 +50,7 @@ export default function UserProfileScreen() {
   const [expandedComments, setExpandedComments] = useState<string | null>(null);
   const [commentsMap, setCommentsMap] = useState<Record<string, Comment[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+  const [isFriend, setIsFriend] = useState(false);
 
   const load = useCallback(async () => {
     if (!userId) return;
@@ -59,6 +60,16 @@ export default function UserProfileScreen() {
 
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    if (user) {
+      const { data: friendship } = await supabase
+        .from('friendships')
+        .select('friend_id')
+        .eq('user_id', user.id)
+        .eq('friend_id', userId)
+        .maybeSingle();
+      setIsFriend(!!friendship);
+    }
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -115,6 +126,23 @@ export default function UserProfileScreen() {
   }, [userId]);
 
   useEffect(() => { load(); }, [load]);
+
+  async function addFriend() {
+    if (!currentUserId || !userId) return;
+    await supabase.from('friend_requests').insert({
+      from_user_id: currentUserId,
+      to_user_id: userId,
+      status: 'pending',
+    });
+    setIsFriend(true);
+  }
+
+  async function removeFriend() {
+    if (!currentUserId || !userId) return;
+    await supabase.from('friendships').delete().eq('user_id', currentUserId).eq('friend_id', userId);
+    await supabase.from('friendships').delete().eq('user_id', userId).eq('friend_id', currentUserId);
+    setIsFriend(false);
+  }
 
   async function toggleLike(post: Post) {
     if (!currentUserId) return;
@@ -185,7 +213,28 @@ export default function UserProfileScreen() {
             )}
           </div>
           <div className={styles.userInfo}>
-            <p className={styles.userName}>{username}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <p className={styles.userName}>{username}</p>
+              {currentUserId && currentUserId !== userId && (
+                <button
+                  onClick={isFriend ? removeFriend : addFriend}
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontWeight: 600,
+                    fontSize: 12,
+                    color: isFriend ? 'var(--color-text-muted)' : 'var(--color-white)',
+                    background: isFriend ? 'transparent' : 'var(--color-primary)',
+                    border: isFriend ? '1.5px solid var(--color-primary-border)' : 'none',
+                    borderRadius: 20,
+                    padding: '4px 10px',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {isFriend ? 'Fjern ven' : 'Tilføj ven'}
+                </button>
+              )}
+            </div>
             <p className={styles.score}>Performativitetsscore: {score}</p>
             <p className={styles.weeklyGain}>De sidste 30 dage: +{weeklyGain}</p>
           </div>

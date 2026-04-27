@@ -312,7 +312,11 @@ export default function PerformanceScreen() {
             {(showAllLeaderboard ? leaderboard : leaderboard.slice(0, 15)).map((entry, i) => (
               <li key={entry.user_id} className={styles.leaderboardItem}>
                 <div className={styles.leaderboardRow}>
-                  <span className={styles.leaderboardName}>
+                  <span
+                    className={styles.leaderboardName}
+                    onClick={() => !entry.isMe && navigate(`/bruger/${entry.user_id}`)}
+                    style={{ cursor: entry.isMe ? 'default' : 'pointer' }}
+                  >
                     {entry.username}
                     {i === 0 && (
                       <img

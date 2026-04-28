@@ -25,11 +25,10 @@ export default function AddActivityScreen() {
   function toggleCategory(name: string) {
     if (openCategory === name) {
       setOpenCategory(null);
-      setSelections([]);
+      setSelections((prev) => prev.filter((s) => s.categoryName !== name));
       setOpenActivity(null);
     } else {
       setOpenCategory(name);
-      setSelections([]);
       setOpenActivity(null);
     }
   }
@@ -41,10 +40,12 @@ export default function AddActivityScreen() {
     );
 
     if (already) {
-      setSelections([]);
-      setOpenActivity(null);
+      setSelections((prev) => prev.filter(
+        (s) => !(s.categoryName === categoryName && s.activity.name === activity.name)
+      ));
+      if (openActivity === key) setOpenActivity(null);
     } else {
-      setSelections([{ categoryName, activity, selectedExtras: [] }]);
+      setSelections((prev) => [...prev, { categoryName, activity, selectedExtras: [] }]);
       setOpenActivity(activity.extras?.length ? key : null);
     }
   }
@@ -93,21 +94,23 @@ export default function AddActivityScreen() {
 
       const username = user.user_metadata?.username ?? user.email ?? '';
 
-      const rows = selections.map((s) => {
+      const activityName = selections.map((s) => s.activity.name).join(', ');
+      const allExtras = selections.flatMap((s) => s.selectedExtras);
+      const totalPoints = selections.reduce((sum, s) => {
         const extraPoints = s.selectedExtras.reduce((ep, extraName) => {
           const extra = s.activity.extras?.find((e) => e.name === extraName);
           return ep + (extra?.points ?? 0);
         }, 0);
-        return {
-          user_id: user.id,
-          username,
-          activity_name: s.activity.name,
-          extras: s.selectedExtras,
-          points: s.activity.points + extraPoints,
-        };
-      });
+        return sum + s.activity.points + extraPoints;
+      }, 0);
 
-      const { error } = await supabase.from('user_activities').insert(rows);
+      const { error } = await supabase.from('user_activities').insert({
+        user_id: user.id,
+        username,
+        activity_name: activityName,
+        extras: allExtras,
+        points: totalPoints,
+      });
       if (error) throw error;
 
       setSelections([]);

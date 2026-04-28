@@ -99,7 +99,7 @@ Følgende giver 10 point:
 - Solnedgang på Dronning Louises Bro
 - Læst bog på offentlig bænk
 - Skrive dagbog på cafe
-- En ur på en omnium
+- En tur på en omnium
 
 **Tanning** giver 10 point. Følgende steder giver +5 ekstra:
 - La Banchina

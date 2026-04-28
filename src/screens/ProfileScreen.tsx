@@ -390,7 +390,7 @@ export default function ProfileScreen() {
                       onMouseDown={(e) => {
                         e.preventDefault();
                         const words = editBio.split(/(\s+)/);
-                        words[words.length - 1] = `@${f.username} `;
+                        words[words.length - 1] = `@[${f.username}] `;
                         setEditBio(words.join(''));
                         setEditBioMentionQuery(null);
                       }}

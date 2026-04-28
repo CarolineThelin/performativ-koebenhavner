@@ -3,22 +3,25 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 function MentionText({ text, onNavigate }: { text: string; onNavigate: (username: string) => void }) {
-  const parts = text.split(/(@[^\s]+)/g);
+  const parts = text.split(/(@\[[^\]]+\])/g);
   return (
     <>
-      {parts.map((part, i) =>
-        part.startsWith('@') ? (
-          <button
-            key={i}
-            onMouseDown={(e) => { e.preventDefault(); onNavigate(part.slice(1)); }}
-            style={{ fontWeight: 700, color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}
-          >
-            {part}
-          </button>
-        ) : (
-          <span key={i}>{part}</span>
-        )
-      )}
+      {parts.map((part, i) => {
+        const match = part.match(/^@\[(.+)\]$/);
+        if (match) {
+          const username = match[1];
+          return (
+            <button
+              key={i}
+              onClick={() => onNavigate(username)}
+              style={{ fontWeight: 700, color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}
+            >
+              @{username}
+            </button>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
     </>
   );
 }
@@ -128,7 +131,7 @@ export default function PostCard({
   function selectMention(username: string) {
     const words = commentInput.split(/(\s+)/);
     const lastIdx = words.length - 1;
-    words[lastIdx] = `@${username} `;
+    words[lastIdx] = `@[${username}] `;
     onCommentChange(words.join(''));
     setMentionQuery(null);
   }

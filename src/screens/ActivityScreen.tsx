@@ -45,14 +45,15 @@ function formatDate(iso: string) {
 }
 
 function renderMentions(text: string) {
-  const parts = text.split(/(@[^\s]+)/g);
-  return parts.map((part, i) =>
-    part.startsWith('@') ? (
-      <MentionLink key={i} username={part.slice(1)}>{part}</MentionLink>
-    ) : (
-      <span key={i}>{part}</span>
-    )
-  );
+  const parts = text.split(/(@\[[^\]]+\])/g);
+  return parts.map((part, i) => {
+    const match = part.match(/^@\[(.+)\]$/);
+    if (match) {
+      const username = match[1];
+      return <MentionLink key={i} username={username}>@{username}</MentionLink>;
+    }
+    return <span key={i}>{part}</span>;
+  });
 }
 
 function MentionLink({ username, children }: { username: string; children: React.ReactNode }) {
@@ -341,7 +342,7 @@ export default function ActivityScreen() {
   function selectMention(postId: string, username: string) {
     const value = commentInputs[postId] ?? '';
     const words = value.split(/(\s+)/);
-    words[words.length - 1] = `@${username} `;
+    words[words.length - 1] = `@[${username}] `;
     setCommentInputs((prev) => ({ ...prev, [postId]: words.join('') }));
     setMentionPostId(null);
     setMentionQuery('');
@@ -579,7 +580,7 @@ export default function ActivityScreen() {
                       onMouseDown={(e) => {
                         e.preventDefault();
                         const words = editBio.split(/(\s+)/);
-                        words[words.length - 1] = `@${f.username} `;
+                        words[words.length - 1] = `@[${f.username}] `;
                         setEditBio(words.join(''));
                         setEditBioMentionQuery(null);
                       }}

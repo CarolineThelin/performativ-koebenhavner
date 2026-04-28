@@ -62,7 +62,8 @@ export default function ActivityScreen() {
   const [commentsMap, setCommentsMap] = useState<Record<string, Comment[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [avatarMap, setAvatarMap] = useState<Record<string, string>>({});
-  const [mentionQueries, setMentionQueries] = useState<Record<string, string | null>>({});
+  const [mentionPostId, setMentionPostId] = useState<string | null>(null);
+  const [mentionQuery, setMentionQuery] = useState('');
   const [friends, setFriends] = useState<{ id: string; username: string }[]>([]);
   const [editBioMentionQuery, setEditBioMentionQuery] = useState<string | null>(null);
 
@@ -268,9 +269,11 @@ export default function ActivityScreen() {
     setCommentInputs((prev) => ({ ...prev, [postId]: value }));
     const lastWord = value.split(/\s/).pop() ?? '';
     if (lastWord.startsWith('@')) {
-      setMentionQueries((prev) => ({ ...prev, [postId]: lastWord.slice(1).toLowerCase() }));
+      setMentionPostId(postId);
+      setMentionQuery(lastWord.slice(1).toLowerCase());
     } else {
-      setMentionQueries((prev) => ({ ...prev, [postId]: null }));
+      setMentionPostId(null);
+      setMentionQuery('');
     }
   }
 
@@ -279,7 +282,8 @@ export default function ActivityScreen() {
     const words = value.split(/(\s+)/);
     words[words.length - 1] = `@${username} `;
     setCommentInputs((prev) => ({ ...prev, [postId]: words.join('') }));
-    setMentionQueries((prev) => ({ ...prev, [postId]: null }));
+    setMentionPostId(null);
+    setMentionQuery('');
   }
 
   async function handleLikeClick(post: Post) {
@@ -443,11 +447,12 @@ export default function ActivityScreen() {
                     )}
                   </div>
                 ))}
-                {mentionQueries[post.id] !== null && mentionQueries[post.id] !== undefined && (
-                  <div style={{ background: 'var(--color-white)', border: '1px solid #ddd', borderRadius: 8, marginBottom: 4, maxHeight: 120, overflowY: 'auto' }}>
-                    {friends
-                      .filter((f) => f.username.toLowerCase().startsWith(mentionQueries[post.id] ?? ''))
-                      .map((f) => (
+                {mentionPostId === post.id && (
+                  <div style={{ background: 'var(--color-white)', border: '1.5px solid var(--color-primary)', borderRadius: 8, marginBottom: 4 }}>
+                    {friends.filter((f) => f.username.toLowerCase().startsWith(mentionQuery)).length === 0 ? (
+                      <p style={{ padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text-muted)', margin: 0 }}>Ingen venner fundet</p>
+                    ) : (
+                      friends.filter((f) => f.username.toLowerCase().startsWith(mentionQuery)).map((f) => (
                         <button
                           key={f.id}
                           onMouseDown={(e) => { e.preventDefault(); selectMention(post.id, f.username); }}
@@ -455,9 +460,7 @@ export default function ActivityScreen() {
                         >
                           @{f.username}
                         </button>
-                      ))}
-                    {friends.filter((f) => f.username.toLowerCase().startsWith(mentionQueries[post.id] ?? '')).length === 0 && (
-                      <p style={{ padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text-muted)', margin: 0 }}>Ingen venner fundet</p>
+                      ))
                     )}
                   </div>
                 )}

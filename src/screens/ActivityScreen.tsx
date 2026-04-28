@@ -67,8 +67,10 @@ export default function ActivityScreen() {
   const [friends, setFriends] = useState<{ id: string; username: string }[]>([]);
   const [editBioMentionQuery, setEditBioMentionQuery] = useState<string | null>(null);
   const [editBioMentionFriends, setEditBioMentionFriends] = useState<{ id: string; username: string }[]>([]);
+  const [editBioMentionLoading, setEditBioMentionLoading] = useState(false);
 
   async function fetchMentionFriends() {
+    setEditBioMentionLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     const { data: friendships } = await supabase.from('friendships').select('friend_id').eq('user_id', user.id);
@@ -84,6 +86,7 @@ export default function ActivityScreen() {
       if (p.username && p.user_id !== user.id && !nameMap[p.user_id]) nameMap[p.user_id] = p.username;
     }
     setEditBioMentionFriends(Object.entries(nameMap).map(([id, username]) => ({ id, username })));
+    setEditBioMentionLoading(false);
   }
 
   const fetchFeed = useCallback(async () => {
@@ -540,7 +543,9 @@ export default function ActivityScreen() {
 
             {editBioMentionQuery !== null && (
               <div style={{ background: 'var(--color-white)', border: '1.5px solid var(--color-primary)', borderRadius: 8, marginBottom: 4 }}>
-                {editBioMentionFriends.filter((f) => f.username.toLowerCase().startsWith(editBioMentionQuery)).length === 0 ? (
+                {editBioMentionLoading ? (
+                  <p style={{ padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text-muted)', margin: 0 }}>Indlæser...</p>
+                ) : editBioMentionFriends.filter((f) => f.username.toLowerCase().startsWith(editBioMentionQuery)).length === 0 ? (
                   <p style={{ padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text-muted)', margin: 0 }}>Ingen venner fundet</p>
                 ) : (
                   editBioMentionFriends.filter((f) => f.username.toLowerCase().startsWith(editBioMentionQuery)).map((f) => (

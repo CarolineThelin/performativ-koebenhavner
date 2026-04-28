@@ -52,6 +52,7 @@ export default function ProfileScreen() {
   const [commentsMap, setCommentsMap] = useState<Record<string, Comment[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [confirmDeletePost, setConfirmDeletePost] = useState<Post | null>(null);
+  const [friends, setFriends] = useState<{ id: string; username: string }[]>([]);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [editActivityKey, setEditActivityKey] = useState('');
   const [editExtras, setEditExtras] = useState<string[]>([]);
@@ -118,6 +119,18 @@ export default function ProfileScreen() {
         comment_count: a.activity_comments?.length ?? 0,
       }))
     );
+
+    const { data: friendships } = await supabase.from('friendships').select('friend_id').eq('user_id', user.id);
+    const friendIds = (friendships ?? []).map((f: { friend_id: string }) => f.friend_id);
+    if (friendIds.length > 0) {
+      const { data: friendActs } = await supabase.from('user_activities').select('user_id, username').in('user_id', friendIds);
+      const seen = new Set<string>();
+      const unique: { id: string; username: string }[] = [];
+      for (const a of friendActs ?? []) {
+        if (!seen.has(a.user_id) && a.username) { seen.add(a.user_id); unique.push({ id: a.user_id, username: a.username }); }
+      }
+      setFriends(unique);
+    }
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -338,6 +351,7 @@ export default function ProfileScreen() {
                 onPhotoDelete={() => handlePhotoDelete(post)}
                 menuOpen={openMenuId === post.id}
                 onMenuToggle={() => setOpenMenuId(openMenuId === post.id ? null : post.id)}
+                friends={friends}
               />
             ))}
           </div>

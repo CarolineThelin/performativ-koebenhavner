@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import styles from '../screens/ActivityScreen.module.css';
@@ -59,6 +59,7 @@ interface PostCardProps {
   onPhotoDelete?: () => void;
   menuOpen?: boolean;
   onMenuToggle?: () => void;
+  friends?: { id: string; username: string }[];
 }
 
 export default function PostCard({
@@ -79,35 +80,14 @@ export default function PostCard({
   onPhotoDelete,
   menuOpen,
   onMenuToggle,
+  friends = [],
 }: PostCardProps) {
   const navigate = useNavigate();
   const isOwn = post.user_id === currentUserId;
   const [confirmDeleteCommentId, setConfirmDeleteCommentId] = useState<string | null>(null);
   const [likers, setLikers] = useState<string[]>([]);
   const [showLikersModal, setShowLikersModal] = useState(false);
-  const [friends, setFriends] = useState<{ id: string; username: string }[]>([]);
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function loadFriends() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data: friendships } = await supabase.from('friendships').select('friend_id').eq('user_id', user.id);
-      const ids = (friendships ?? []).map((f: { friend_id: string }) => f.friend_id);
-      if (ids.length === 0) return;
-      const { data: acts } = await supabase.from('user_activities').select('user_id, username').in('user_id', ids);
-      const seen = new Set<string>();
-      const unique: { id: string; username: string }[] = [];
-      for (const a of acts ?? []) {
-        if (!seen.has(a.user_id) && a.username) {
-          seen.add(a.user_id);
-          unique.push({ id: a.user_id, username: a.username });
-        }
-      }
-      setFriends(unique);
-    }
-    loadFriends();
-  }, []);
 
   function handleCommentInput(value: string) {
     onCommentChange(value);

@@ -17,6 +17,10 @@ export default function AddActivityScreen() {
   const [openActivity, setOpenActivity] = useState<string | null>(null);
   const [selections, setSelections] = useState<Selection[]>([]);
   const [saving, setSaving] = useState(false);
+  const [showBioModal, setShowBioModal] = useState(false);
+  const [bio, setBio] = useState('');
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [showQualify, setShowQualify] = useState(false);
   const [qualifyText, setQualifyText] = useState('');
   const [qualifySaving, setQualifySaving] = useState(false);
@@ -86,9 +90,11 @@ export default function AddActivityScreen() {
     }, 0);
   }
 
-  async function handleSubmit() {
+  async function handleSubmit(submitBio?: string, submitPhoto?: File | null) {
     if (selections.length === 0) return;
     setSaving(true);
+    const useBio = submitBio !== undefined ? submitBio : bio;
+    const usePhoto = submitPhoto !== undefined ? submitPhoto : photoFile;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Ikke logget ind');
@@ -108,18 +114,30 @@ export default function AddActivityScreen() {
         return sum + s.activity.points + extraPoints;
       }, 0);
 
-      const { error } = await supabase.from('user_activities').insert({
+      const { data: inserted, error } = await supabase.from('user_activities').insert({
         user_id: user.id,
         username,
         activity_name: activityName,
         extras: allExtras,
         points: totalPoints,
-      });
+        bio: useBio.trim() || null,
+      }).select('id').single();
       if (error) throw error;
+
+      if (usePhoto && inserted?.id) {
+        const path = `${user.id}/${Date.now()}_${usePhoto.name}`;
+        await supabase.storage.from('activity-images').upload(path, usePhoto);
+        const { data: urlData } = supabase.storage.from('activity-images').getPublicUrl(path);
+        await supabase.from('user_activities').update({ image_url: urlData.publicUrl }).eq('id', inserted.id);
+      }
 
       setSelections([]);
       setOpenCategory(null);
-      setTimeout(() => navigate('/aktivitet'), 800);
+      setShowBioModal(false);
+      setBio('');
+      setPhotoFile(null);
+      setPhotoPreview(null);
+      setTimeout(() => navigate('/aktivitet'), 400);
     } catch (err) {
       console.error(err);
     } finally {
@@ -240,7 +258,7 @@ export default function AddActivityScreen() {
 
             <button
               className={styles.submitButton}
-              onClick={handleSubmit}
+              onClick={() => setShowBioModal(true)}
               disabled={saving || !canSubmit}
             >
               {saving ? 'Gemmer...' : `Tilføj ${totalPoints > 0 ? `+${totalPoints}` : totalPoints} point`}
@@ -283,6 +301,58 @@ export default function AddActivityScreen() {
       </main>
 
       <TabBar />
+
+      {showBioModal && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.25)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowBioModal(false); }}
+        >
+          <div style={{ background: 'var(--color-white)', borderRadius: 20, padding: '24px 20px', width: 'calc(390px - 40px)', maxWidth: 350, display: 'flex', flexDirection: 'column', gap: 14, boxShadow: '0 10px 20px rgba(0,0,0,0.2)' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 20, color: 'var(--color-text)', textAlign: 'center' }}>Tilføj til dit opslag</p>
+
+            <textarea
+              style={{ fontFamily: 'var(--font-body)', fontSize: 15, background: 'var(--color-primary-light)', border: 'none', borderRadius: 16, padding: '12px 16px', outline: 'none', resize: 'none', color: 'var(--color-text)', width: '100%', boxSizing: 'border-box' }}
+              placeholder="Tilføj en beskrivelse..."
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              rows={3}
+            />
+
+            {photoPreview ? (
+              <div style={{ position: 'relative' }}>
+                <img src={photoPreview} alt="" style={{ width: '100%', borderRadius: 12, maxHeight: 200, objectFit: 'cover' }} />
+                <button
+                  onClick={() => { setPhotoFile(null); setPhotoPreview(null); }}
+                  style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 13 }}
+                >✕</button>
+              </div>
+            ) : (
+              <label style={{ display: 'inline-block', fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13, color: 'var(--color-primary)', border: '1.5px dashed var(--color-primary)', borderRadius: 20, padding: '8px 16px', cursor: 'pointer', textAlign: 'center' }}>
+                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) { setPhotoFile(file); setPhotoPreview(URL.createObjectURL(file)); }
+                }} />
+                + Tilføj foto
+              </label>
+            )}
+
+            <button
+              onClick={() => handleSubmit()}
+              disabled={saving}
+              style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 18, color: 'var(--color-white)', background: 'var(--color-primary)', border: 'none', borderRadius: 'var(--radius-button)', padding: 16, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+            >
+              {saving ? 'Gemmer...' : 'Del opslag'}
+            </button>
+            <button
+              onClick={() => handleSubmit('', null)}
+              disabled={saving}
+              style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 15, color: 'var(--color-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              Spring over
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

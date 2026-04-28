@@ -69,18 +69,21 @@ export default function ActivityScreen() {
   const [editBioMentionFriends, setEditBioMentionFriends] = useState<{ id: string; username: string }[]>([]);
 
   async function fetchMentionFriends() {
-    if (editBioMentionFriends.length > 0) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     const { data: friendships } = await supabase.from('friendships').select('friend_id').eq('user_id', user.id);
     const friendIds = (friendships ?? []).map((f: { friend_id: string }) => f.friend_id);
-    if (friendIds.length === 0) return;
     const nameMap: Record<string, string> = {};
-    const { data: profiles } = await supabase.from('profiles').select('id, username').in('id', friendIds);
-    for (const p of profiles ?? []) { if (p.username) nameMap[p.id] = p.username; }
-    const { data: acts } = await supabase.from('user_activities').select('user_id, username').in('user_id', friendIds);
-    for (const a of acts ?? []) { if (a.username && !nameMap[a.user_id]) nameMap[a.user_id] = a.username; }
-    setEditBioMentionFriends(friendIds.filter((id: string) => nameMap[id]).map((id: string) => ({ id, username: nameMap[id] })));
+    if (friendIds.length > 0) {
+      const { data: profiles } = await supabase.from('profiles').select('id, username').in('id', friendIds);
+      for (const p of profiles ?? []) { if (p.username) nameMap[p.id] = p.username; }
+      const { data: acts } = await supabase.from('user_activities').select('user_id, username').in('user_id', friendIds);
+      for (const a of acts ?? []) { if (a.username && !nameMap[a.user_id]) nameMap[a.user_id] = a.username; }
+    }
+    for (const p of posts) {
+      if (p.username && p.user_id !== user.id && !nameMap[p.user_id]) nameMap[p.user_id] = p.username;
+    }
+    setEditBioMentionFriends(Object.entries(nameMap).map(([id, username]) => ({ id, username })));
   }
 
   const fetchFeed = useCallback(async () => {

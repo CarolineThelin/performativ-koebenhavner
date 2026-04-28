@@ -248,11 +248,11 @@ export default function ActivityScreen() {
 
     const sels = names.map((name) => {
       const act = allActivities.find((a) => a.name === name);
-      const matchedExtras = (post.extras ?? []).filter((ex) =>
-        act?.extras?.some((e) => e.name === ex)
-      );
+      const matchedExtras = act
+        ? (post.extras ?? []).filter((ex) => act.extras?.some((e) => e.name === ex))
+        : (post.extras ?? []);
       return { activityName: name, selectedExtras: matchedExtras };
-    }).filter((s) => allActivities.some((a) => a.name === s.activityName));
+    });
 
     setEditSelections(sels.length > 0 ? sels : []);
   }
@@ -649,6 +649,13 @@ export default function ActivityScreen() {
             />
 
             <div className={styles.editActivityList}>
+              {editSelections.filter((s) => !categories.flatMap((c) => c.activities).some((a) => a.name === s.activityName)).map((s) => (
+                <div key={s.activityName} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', opacity: 0.6 }}>
+                  <span className={`${styles.editCheckbox} ${styles.editChecked}`}><span className={styles.editCheckmark}>✓</span></span>
+                  <span className={styles.editActivityName}>{s.activityName}</span>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-text-muted)' }}>(fjernet)</span>
+                </div>
+              ))}
               {categories.map((cat) => (
                 <div key={cat.name}>
                   <button

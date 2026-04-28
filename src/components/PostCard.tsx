@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import styles from '../screens/ActivityScreen.module.css';
@@ -88,23 +88,32 @@ export default function PostCard({
   const [friends, setFriends] = useState<{ id: string; username: string }[]>([]);
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
 
-  async function loadFriends() {
-    if (friends.length > 0) return;
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data: friendships } = await supabase.from('friendships').select('friend_id').eq('user_id', user.id);
-    const ids = (friendships ?? []).map((f: { friend_id: string }) => f.friend_id);
-    if (ids.length === 0) return;
-    const { data: profiles } = await supabase.from('profiles').select('id, username').in('id', ids);
-    setFriends(profiles ?? []);
-  }
+  useEffect(() => {
+    async function loadFriends() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: friendships } = await supabase.from('friendships').select('friend_id').eq('user_id', user.id);
+      const ids = (friendships ?? []).map((f: { friend_id: string }) => f.friend_id);
+      if (ids.length === 0) return;
+      const { data: acts } = await supabase.from('user_activities').select('user_id, username').in('user_id', ids);
+      const seen = new Set<string>();
+      const unique: { id: string; username: string }[] = [];
+      for (const a of acts ?? []) {
+        if (!seen.has(a.user_id) && a.username) {
+          seen.add(a.user_id);
+          unique.push({ id: a.user_id, username: a.username });
+        }
+      }
+      setFriends(unique);
+    }
+    loadFriends();
+  }, []);
 
   function handleCommentInput(value: string) {
     onCommentChange(value);
     const lastWord = value.split(/\s/).pop() ?? '';
     if (lastWord.startsWith('@')) {
       setMentionQuery(lastWord.slice(1).toLowerCase());
-      loadFriends();
     } else {
       setMentionQuery(null);
     }

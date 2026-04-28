@@ -78,6 +78,22 @@ export default function ActivityScreen() {
     const friendIds = (friendships ?? []).map((f) => f.friend_id);
     const allowedIds = [user.id, ...friendIds];
 
+    if (friendIds.length > 0) {
+      const { data: friendActs } = await supabase
+        .from('user_activities')
+        .select('user_id, username')
+        .in('user_id', friendIds);
+      const seen = new Set<string>();
+      const unique: { id: string; username: string }[] = [];
+      for (const a of friendActs ?? []) {
+        if (!seen.has(a.user_id) && a.username) {
+          seen.add(a.user_id);
+          unique.push({ id: a.user_id, username: a.username });
+        }
+      }
+      setFriends(unique);
+    }
+
     const { data: activities } = await supabase
       .from('user_activities')
       .select('*, activity_likes(user_id), activity_comments(id)')
@@ -249,23 +265,11 @@ export default function ActivityScreen() {
     );
   }
 
-  async function loadFriends() {
-    if (friends.length > 0) return;
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data: friendships } = await supabase.from('friendships').select('friend_id').eq('user_id', user.id);
-    const ids = (friendships ?? []).map((f: { friend_id: string }) => f.friend_id);
-    if (ids.length === 0) return;
-    const { data: profiles } = await supabase.from('profiles').select('id, username').in('id', ids);
-    setFriends(profiles ?? []);
-  }
-
   function handleCommentInput(postId: string, value: string) {
     setCommentInputs((prev) => ({ ...prev, [postId]: value }));
     const lastWord = value.split(/\s/).pop() ?? '';
     if (lastWord.startsWith('@')) {
       setMentionQueries((prev) => ({ ...prev, [postId]: lastWord.slice(1).toLowerCase() }));
-      loadFriends();
     } else {
       setMentionQueries((prev) => ({ ...prev, [postId]: null }));
     }

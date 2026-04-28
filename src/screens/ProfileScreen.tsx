@@ -58,6 +58,7 @@ export default function ProfileScreen() {
   const [editExtras, setEditExtras] = useState<string[]>([]);
   const [editBio, setEditBio] = useState('');
   const [editOpenCategory, setEditOpenCategory] = useState<string | null>(null);
+  const [editBioMentionQuery, setEditBioMentionQuery] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -375,11 +376,43 @@ export default function ProfileScreen() {
         <div className={feedStyles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) setEditingPost(null); }}>
           <div className={feedStyles.modalCard}>
             <p className={feedStyles.modalTitle}>Rediger aktivitet</p>
+            {editBioMentionQuery !== null && (
+              <div style={{ background: 'var(--color-white)', border: '1px solid #ddd', borderRadius: 8, marginBottom: 4, maxHeight: 120, overflowY: 'auto' }}>
+                {friends.filter((f) => f.username.toLowerCase().startsWith(editBioMentionQuery)).length === 0 ? (
+                  <p style={{ padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text-muted)', margin: 0 }}>Ingen venner fundet</p>
+                ) : (
+                  friends.filter((f) => f.username.toLowerCase().startsWith(editBioMentionQuery)).map((f) => (
+                    <button
+                      key={f.id}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        const words = editBio.split(/(\s+)/);
+                        words[words.length - 1] = `@${f.username} `;
+                        setEditBio(words.join(''));
+                        setEditBioMentionQuery(null);
+                      }}
+                      style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text)' }}
+                    >
+                      @{f.username}
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
             <textarea
               className={feedStyles.modalTextarea}
               placeholder="Tilføj en beskrivelse..."
               value={editBio}
-              onChange={(e) => setEditBio(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setEditBio(val);
+                const lastWord = val.split(/\s/).pop() ?? '';
+                if (lastWord.startsWith('@')) {
+                  setEditBioMentionQuery(lastWord.slice(1).toLowerCase());
+                } else {
+                  setEditBioMentionQuery(null);
+                }
+              }}
               rows={3}
               autoFocus
             />

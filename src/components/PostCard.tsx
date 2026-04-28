@@ -115,7 +115,13 @@ export default function PostCard({
 
   async function navigateToMention(username: string) {
     const { data } = await supabase.from('profiles').select('id').eq('username', username).maybeSingle();
-    if (data?.id) navigate(`/bruger/${data.id}`);
+    if (!data?.id) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.id === data.id) {
+      navigate('/profil');
+    } else {
+      navigate(`/bruger/${data.id}`);
+    }
   }
 
   function handleCommentInput(value: string) {

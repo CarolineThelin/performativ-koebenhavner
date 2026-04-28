@@ -60,7 +60,13 @@ function MentionLink({ username, children }: { username: string; children: React
   const navigate = useNavigate();
   async function go() {
     const { data } = await supabase.from('profiles').select('id').eq('username', username).maybeSingle();
-    if (data?.id) navigate(`/bruger/${data.id}`);
+    if (!data?.id) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.id === data.id) {
+      navigate('/profil');
+    } else {
+      navigate(`/bruger/${data.id}`);
+    }
   }
   return (
     <button onClick={go} style={{ fontWeight: 700, color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}>

@@ -161,7 +161,7 @@ export const categories: Category[] = [
           { name: 'Eget bat', points: 5 },
         ],
       },
-      { name: 'Barry', points: 10, extras: [] },
+      { name: "Barry's", points: 10, extras: [] },
     ],
   },
   {

@@ -39,6 +39,13 @@ function AuthRouter() {
         navigate('/nyt-kodeord');
       } else {
         setLoggedIn(!!session);
+        if (event === 'SIGNED_IN' && session?.user) {
+          const u = session.user;
+          const username = u.user_metadata?.username;
+          if (username) {
+            supabase.from('profiles').upsert({ id: u.id, username }, { onConflict: 'id', ignoreDuplicates: false });
+          }
+        }
       }
     });
 

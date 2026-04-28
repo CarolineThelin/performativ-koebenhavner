@@ -30,7 +30,7 @@
 }
 
 .active .icon {
-  filter: invert(58%) sepia(76%) saturate(250%) hue-rotate(340deg) brightness(103%);
+  filter: invert(58%) sepia(76%) saturate(400%) hue-rotate(340deg) brightness(103%);
 }
 
 

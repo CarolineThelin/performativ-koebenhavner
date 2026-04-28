@@ -45,6 +45,7 @@ export default function AddActivityScreen() {
       ));
       if (openActivity === key) setOpenActivity(null);
     } else {
+      if (selections.length >= 3) return;
       setSelections((prev) => [...prev, { categoryName, activity, selectedExtras: [] }]);
       setOpenActivity(activity.extras?.length ? key : null);
     }
@@ -94,7 +95,10 @@ export default function AddActivityScreen() {
 
       const username = user.user_metadata?.username ?? user.email ?? '';
 
-      const activityName = selections.map((s) => s.activity.name).join(', ');
+      const names = selections.map((s) => s.activity.name);
+      const activityName = names.length <= 1
+        ? names[0] ?? ''
+        : names.slice(0, -1).join(', ') + ' & ' + names[names.length - 1];
       const allExtras = selections.flatMap((s) => s.selectedExtras);
       const totalPoints = selections.reduce((sum, s) => {
         const extraPoints = s.selectedExtras.reduce((ep, extraName) => {

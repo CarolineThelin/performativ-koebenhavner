@@ -83,8 +83,8 @@ export default function ActivityScreen() {
   const [loading, setLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
-  const [editActivityKey, setEditActivityKey] = useState('');
-  const [editExtras, setEditExtras] = useState<string[]>([]);
+  const [editSelections, setEditSelections] = useState<{ activityName: string; selectedExtras: string[] }[]>([]);
+  const [editOpenActivity, setEditOpenActivity] = useState<string | null>(null);
   const [editBio, setEditBio] = useState('');
   const [editOpenCategory, setEditOpenCategory] = useState<string | null>(null);
   const [confirmDeletePost, setConfirmDeletePost] = useState<Post | null>(null);
@@ -236,38 +236,69 @@ export default function ActivityScreen() {
 
   function openEdit(post: Post) {
     setEditingPost(post);
-    setEditActivityKey(post.activity_name);
-    setEditExtras(post.extras ?? []);
     setEditBio(post.bio ?? '');
     setEditOpenCategory(null);
+    setEditOpenActivity(null);
     setOpenMenuId(null);
+
+    const allActivities = categories.flatMap((c) => c.activities);
+    const names = post.activity_name
+      .split(/,\s*| & /)
+      .map((n) => n.trim());
+
+    const sels = names.map((name) => {
+      const act = allActivities.find((a) => a.name === name);
+      const matchedExtras = (post.extras ?? []).filter((ex) =>
+        act?.extras?.some((e) => e.name === ex)
+      );
+      return { activityName: name, selectedExtras: matchedExtras };
+    }).filter((s) => allActivities.some((a) => a.name === s.activityName));
+
+    setEditSelections(sels.length > 0 ? sels : []);
+  }
+
+  function toggleEditActivity(activityName: string) {
+    const already = editSelections.find((s) => s.activityName === activityName);
+    if (already) {
+      setEditSelections((prev) => prev.filter((s) => s.activityName !== activityName));
+      if (editOpenActivity === activityName) setEditOpenActivity(null);
+    } else {
+      if (editSelections.length >= 3) return;
+      const act = categories.flatMap((c) => c.activities).find((a) => a.name === activityName);
+      setEditSelections((prev) => [...prev, { activityName, selectedExtras: [] }]);
+      setEditOpenActivity(act?.extras?.length ? activityName : null);
+    }
+  }
+
+  function toggleEditExtra(activityName: string, extraName: string) {
+    setEditSelections((prev) => prev.map((s) => {
+      if (s.activityName !== activityName) return s;
+      const has = s.selectedExtras.includes(extraName);
+      return { ...s, selectedExtras: has ? s.selectedExtras.filter((e) => e !== extraName) : [...s.selectedExtras, extraName] };
+    }));
   }
 
   async function saveEdit() {
-    if (!editingPost) return;
-    const selectedActivity = categories
-      .flatMap((c) => c.activities)
-      .find((a) => a.name === editActivityKey);
-    const extraPoints = editExtras.reduce((sum, extraName) => {
-      const extra = selectedActivity?.extras?.find((e) => e.name === extraName);
-      return sum + (extra?.points ?? 0);
+    if (!editingPost || editSelections.length === 0) return;
+    const allActivities = categories.flatMap((c) => c.activities);
+
+    const names = editSelections.map((s) => s.activityName);
+    const activityName = names.length <= 1
+      ? names[0] ?? ''
+      : names.slice(0, -1).join(', ') + ' & ' + names[names.length - 1];
+    const allExtras = editSelections.flatMap((s) => s.selectedExtras);
+    const totalPoints = editSelections.reduce((sum, s) => {
+      const act = allActivities.find((a) => a.name === s.activityName);
+      const extraPoints = s.selectedExtras.reduce((ep, extraName) => {
+        const extra = act?.extras?.find((e) => e.name === extraName);
+        return ep + (extra?.points ?? 0);
+      }, 0);
+      return sum + (act?.points ?? 0) + extraPoints;
     }, 0);
-    const updates: Record<string, unknown> = {
-      bio: editBio.trim() || null,
-      extras: editExtras,
-    };
-    if (selectedActivity) {
-      updates.activity_name = selectedActivity.name;
-      updates.points = selectedActivity.points + extraPoints;
-    }
+
+    const updates = { bio: editBio.trim() || null, extras: allExtras, activity_name: activityName, points: totalPoints };
     await supabase.from('user_activities').update(updates).eq('id', editingPost.id);
-    setPosts((prev) => prev.map((p) => p.id === editingPost.id ? {
-      ...p,
-      activity_name: (updates.activity_name as string) ?? p.activity_name,
-      points: (updates.points as number) ?? p.points,
-      extras: editExtras,
-      bio: updates.bio as string | null,
-    } : p));
+    setPosts((prev) => prev.map((p) => p.id === editingPost.id ? { ...p, ...updates, bio: updates.bio as string | null } : p));
     setEditingPost(null);
   }
 
@@ -631,15 +662,13 @@ export default function ActivityScreen() {
                   {editOpenCategory === cat.name && (
                     <ul className={styles.editActivities}>
                       {cat.activities.map((act) => {
-                        const selected = editActivityKey === act.name;
+                        const sel = editSelections.find((s) => s.activityName === act.name);
+                        const selected = !!sel;
                         return (
                           <li key={act.name}>
                             <button
                               className={styles.editActivityRow}
-                              onClick={() => {
-                                setEditActivityKey(act.name);
-                                setEditExtras([]);
-                              }}
+                              onClick={() => toggleEditActivity(act.name)}
                             >
                               <span className={`${styles.editCheckbox} ${selected ? styles.editChecked : ''}`}>
                                 {selected && <span className={styles.editCheckmark}>✓</span>}
@@ -652,21 +681,19 @@ export default function ActivityScreen() {
 
                             {selected && act.extras && act.extras.length > 0 && (
                               <>
-                                {editExtras.length === 0 && (
+                                {(sel?.selectedExtras.length ?? 0) === 0 && (
                                   <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#c0392b', padding: '4px 0 4px 32px', margin: 0 }}>
                                     Vælg mindst én underkategori
                                   </p>
                                 )}
                                 <ul className={styles.editExtras}>
                                   {act.extras.map((extra) => {
-                                    const checked = editExtras.includes(extra.name);
+                                    const checked = sel?.selectedExtras.includes(extra.name) ?? false;
                                     return (
                                       <li key={extra.name}>
                                         <button
                                           className={styles.editActivityRow}
-                                          onClick={() => setEditExtras((prev) =>
-                                            checked ? prev.filter((e) => e !== extra.name) : [...prev, extra.name]
-                                          )}
+                                          onClick={() => toggleEditExtra(act.name, extra.name)}
                                         >
                                           <span className={`${styles.editCheckbox} ${checked ? styles.editChecked : ''}`}>
                                             {checked && <span className={styles.editCheckmark}>✓</span>}
@@ -696,10 +723,10 @@ export default function ActivityScreen() {
             <button
               className={styles.modalSave}
               onClick={saveEdit}
-              disabled={(() => {
-                const act = categories.flatMap((c) => c.activities).find((a) => a.name === editActivityKey);
-                return !!(act?.extras?.length && editExtras.length === 0);
-              })()}
+              disabled={editSelections.length === 0 || editSelections.some((s) => {
+                const act = categories.flatMap((c) => c.activities).find((a) => a.name === s.activityName);
+                return !!(act?.extras?.length && s.selectedExtras.length === 0);
+              })}
             >
               Gem
             </button>

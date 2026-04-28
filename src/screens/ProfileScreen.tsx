@@ -123,13 +123,9 @@ export default function ProfileScreen() {
     const { data: friendships } = await supabase.from('friendships').select('friend_id').eq('user_id', user.id);
     const friendIds = (friendships ?? []).map((f: { friend_id: string }) => f.friend_id);
     if (friendIds.length > 0) {
-      const { data: friendActs } = await supabase.from('user_activities').select('user_id, username').in('user_id', friendIds);
-      const seen = new Set<string>();
-      const unique: { id: string; username: string }[] = [];
-      for (const a of friendActs ?? []) {
-        if (!seen.has(a.user_id) && a.username) { seen.add(a.user_id); unique.push({ id: a.user_id, username: a.username }); }
-      }
-      setFriends(unique);
+      const { data: profiles } = await supabase.from('profiles').select('id, username').in('id', friendIds);
+      const withUsername = (profiles ?? []).filter((p: { username: string | null }) => p.username);
+      setFriends(withUsername.map((p: { id: string; username: string }) => ({ id: p.id, username: p.username })));
     }
   }, []);
 

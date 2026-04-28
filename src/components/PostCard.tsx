@@ -1,6 +1,27 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+
+function MentionText({ text, onNavigate }: { text: string; onNavigate: (username: string) => void }) {
+  const parts = text.split(/(@[^\s]+)/g);
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.startsWith('@') ? (
+          <button
+            key={i}
+            onMouseDown={(e) => { e.preventDefault(); onNavigate(part.slice(1)); }}
+            style={{ fontWeight: 700, color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}
+          >
+            {part}
+          </button>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+}
 import styles from '../screens/ActivityScreen.module.css';
 import avatarIcon from '../../assets/icons/profil.svg';
 import likeIcon from '../../assets/icons/like.svg';
@@ -88,6 +109,11 @@ export default function PostCard({
   const [likers, setLikers] = useState<string[]>([]);
   const [showLikersModal, setShowLikersModal] = useState(false);
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+
+  async function navigateToMention(username: string) {
+    const { data } = await supabase.from('profiles').select('id').eq('username', username).maybeSingle();
+    if (data?.id) navigate(`/bruger/${data.id}`);
+  }
 
   function handleCommentInput(value: string) {
     onCommentChange(value);
@@ -185,7 +211,7 @@ export default function PostCard({
       </div>
 
       <h2 className={styles.activityName}>{post.activity_name}</h2>
-      {post.bio && <p className={styles.postBio}>{post.bio}</p>}
+      {post.bio && <p className={styles.postBio}><MentionText text={post.bio} onNavigate={navigateToMention} /></p>}
 
       {post.extras.length > 0 && (
         <div className={styles.extrasList}>
@@ -247,7 +273,7 @@ export default function PostCard({
                 >
                   {comment.username}
                 </button>
-                <span className={styles.commentBody}>{comment.body}</span>
+                <span className={styles.commentBody}><MentionText text={comment.body} onNavigate={navigateToMention} /></span>
               </div>
               {(comment.user_id === currentUserId || post.user_id === currentUserId) && (
                 <button className={styles.commentDelete} onClick={() => setConfirmDeleteCommentId(comment.id)}>✕</button>

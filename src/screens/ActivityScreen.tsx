@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { categories } from '../data/activities';
@@ -41,6 +42,30 @@ function formatDate(iso: string) {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+function renderMentions(text: string) {
+  const parts = text.split(/(@[^\s]+)/g);
+  return parts.map((part, i) =>
+    part.startsWith('@') ? (
+      <MentionLink key={i} username={part.slice(1)}>{part}</MentionLink>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  );
+}
+
+function MentionLink({ username, children }: { username: string; children: React.ReactNode }) {
+  const navigate = useNavigate();
+  async function go() {
+    const { data } = await supabase.from('profiles').select('id').eq('username', username).maybeSingle();
+    if (data?.id) navigate(`/bruger/${data.id}`);
+  }
+  return (
+    <button onClick={go} style={{ fontWeight: 700, color: 'var(--color-primary)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}>
+      {children}
+    </button>
+  );
 }
 
 export default function ActivityScreen() {
@@ -411,7 +436,7 @@ export default function ActivityScreen() {
             </div>
 
             <h2 className={styles.activityName}>{post.activity_name}</h2>
-            {post.bio && <p className={styles.postBio}>{post.bio}</p>}
+            {post.bio && <p className={styles.postBio}>{renderMentions(post.bio)}</p>}
 
             {post.extras.length > 0 && (
               <div className={styles.extrasList}>
@@ -476,7 +501,7 @@ export default function ActivityScreen() {
                       >
                         {comment.username}
                       </button>
-                      <span className={styles.commentBody}>{comment.body}</span>
+                      <span className={styles.commentBody}>{renderMentions(comment.body)}</span>
                     </div>
                     {(comment.user_id === currentUserId || post.user_id === currentUserId) && (
                       <button className={styles.commentDelete} onClick={() => setConfirmDeleteComment({ postId: post.id, commentId: comment.id })}>✕</button>

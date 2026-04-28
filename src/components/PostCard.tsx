@@ -85,6 +85,38 @@ export default function PostCard({
   const [confirmDeleteCommentId, setConfirmDeleteCommentId] = useState<string | null>(null);
   const [likers, setLikers] = useState<string[]>([]);
   const [showLikersModal, setShowLikersModal] = useState(false);
+  const [friends, setFriends] = useState<{ id: string; username: string }[]>([]);
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+
+  async function loadFriends() {
+    if (friends.length > 0) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data: friendships } = await supabase.from('friendships').select('friend_id').eq('user_id', user.id);
+    const ids = (friendships ?? []).map((f: { friend_id: string }) => f.friend_id);
+    if (ids.length === 0) return;
+    const { data: profiles } = await supabase.from('profiles').select('id, username').in('id', ids);
+    setFriends(profiles ?? []);
+  }
+
+  function handleCommentInput(value: string) {
+    onCommentChange(value);
+    const lastWord = value.split(/\s/).pop() ?? '';
+    if (lastWord.startsWith('@')) {
+      setMentionQuery(lastWord.slice(1).toLowerCase());
+      loadFriends();
+    } else {
+      setMentionQuery(null);
+    }
+  }
+
+  function selectMention(username: string) {
+    const words = commentInput.split(/(\s+)/);
+    const lastIdx = words.length - 1;
+    words[lastIdx] = `@${username} `;
+    onCommentChange(words.join(''));
+    setMentionQuery(null);
+  }
 
   async function handleLikeClick() {
     if (isOwn) {
@@ -233,12 +265,30 @@ export default function PostCard({
               )}
             </div>
           ))}
+          {mentionQuery !== null && (
+            <div style={{ background: 'var(--color-white)', border: '1px solid #ddd', borderRadius: 8, marginBottom: 4, maxHeight: 120, overflowY: 'auto' }}>
+              {friends
+                .filter((f) => f.username.toLowerCase().startsWith(mentionQuery))
+                .map((f) => (
+                  <button
+                    key={f.id}
+                    onMouseDown={(e) => { e.preventDefault(); selectMention(f.username); }}
+                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text)' }}
+                  >
+                    @{f.username}
+                  </button>
+                ))}
+              {friends.filter((f) => f.username.toLowerCase().startsWith(mentionQuery)).length === 0 && (
+                <p style={{ padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text-muted)', margin: 0 }}>Ingen venner fundet</p>
+              )}
+            </div>
+          )}
           <div className={styles.commentInputRow}>
             <input
               className={styles.commentInput}
               placeholder="Skriv en kommentar..."
               value={commentInput}
-              onChange={(e) => onCommentChange(e.target.value)}
+              onChange={(e) => handleCommentInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && onCommentSubmit()}
             />
             <button className={styles.commentSend} onClick={onCommentSubmit}>Send</button>

@@ -21,7 +21,7 @@ interface FriendRequest {
 
 interface ActivityNotification {
   id: string;
-  type: 'like' | 'comment';
+  type: 'like' | 'comment' | 'mention';
   from_username: string;
   activity_name: string;
   activity_id: string;
@@ -168,6 +168,32 @@ export default function PerformanceScreen() {
           created_at: c.created_at,
           body: c.body,
         });
+      }
+    }
+
+    const myUsername = user.user_metadata?.username;
+    if (myUsername) {
+      const { data: mentions } = await supabase
+        .from('activity_comments')
+        .select('id, activity_id, user_id, username, body, created_at')
+        .ilike('body', `%@${myUsername}%`)
+        .neq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      for (const c of mentions ?? []) {
+        const alreadyAdded = notifs.some((n) => n.id === `comment-${c.id}`);
+        if (!alreadyAdded) {
+          notifs.push({
+            id: `mention-${c.id}`,
+            type: 'mention',
+            from_username: c.username ?? 'Nogen',
+            activity_name: activityNameMap[c.activity_id] ?? '',
+            activity_id: c.activity_id,
+            created_at: c.created_at,
+            body: c.body,
+          });
+        }
       }
     }
 
@@ -385,6 +411,8 @@ export default function PerformanceScreen() {
                       >
                         {item.n.type === 'like'
                           ? `${item.n.from_username} likede din ${item.n.activity_name}`
+                          : item.n.type === 'mention'
+                          ? `${item.n.from_username} nævnte dig: "${item.n.body}"`
                           : `${item.n.from_username} kommenterede din ${item.n.activity_name}: "${item.n.body}"`}
                       </button>
                       <button className={styles.dismissButton} onClick={() => dismissNotif(item.id)}>✕</button>

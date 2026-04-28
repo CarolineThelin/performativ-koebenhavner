@@ -62,6 +62,8 @@ export default function ActivityScreen() {
   const [commentsMap, setCommentsMap] = useState<Record<string, Comment[]>>({});
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [avatarMap, setAvatarMap] = useState<Record<string, string>>({});
+  const [mentionQueries, setMentionQueries] = useState<Record<string, string | null>>({});
+  const [friends, setFriends] = useState<{ id: string; username: string }[]>([]);
 
   const fetchFeed = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -247,6 +249,36 @@ export default function ActivityScreen() {
     );
   }
 
+  async function loadFriends() {
+    if (friends.length > 0) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data: friendships } = await supabase.from('friendships').select('friend_id').eq('user_id', user.id);
+    const ids = (friendships ?? []).map((f: { friend_id: string }) => f.friend_id);
+    if (ids.length === 0) return;
+    const { data: profiles } = await supabase.from('profiles').select('id, username').in('id', ids);
+    setFriends(profiles ?? []);
+  }
+
+  function handleCommentInput(postId: string, value: string) {
+    setCommentInputs((prev) => ({ ...prev, [postId]: value }));
+    const lastWord = value.split(/\s/).pop() ?? '';
+    if (lastWord.startsWith('@')) {
+      setMentionQueries((prev) => ({ ...prev, [postId]: lastWord.slice(1).toLowerCase() }));
+      loadFriends();
+    } else {
+      setMentionQueries((prev) => ({ ...prev, [postId]: null }));
+    }
+  }
+
+  function selectMention(postId: string, username: string) {
+    const value = commentInputs[postId] ?? '';
+    const words = value.split(/(\s+)/);
+    words[words.length - 1] = `@${username} `;
+    setCommentInputs((prev) => ({ ...prev, [postId]: words.join('') }));
+    setMentionQueries((prev) => ({ ...prev, [postId]: null }));
+  }
+
   async function handleLikeClick(post: Post) {
     if (post.user_id === currentUserId) {
       const { data: likes } = await supabase
@@ -408,12 +440,30 @@ export default function ActivityScreen() {
                     )}
                   </div>
                 ))}
+                {mentionQueries[post.id] !== null && mentionQueries[post.id] !== undefined && (
+                  <div style={{ background: 'var(--color-white)', border: '1px solid #ddd', borderRadius: 8, marginBottom: 4, maxHeight: 120, overflowY: 'auto' }}>
+                    {friends
+                      .filter((f) => f.username.toLowerCase().startsWith(mentionQueries[post.id] ?? ''))
+                      .map((f) => (
+                        <button
+                          key={f.id}
+                          onMouseDown={(e) => { e.preventDefault(); selectMention(post.id, f.username); }}
+                          style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: 14, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text)' }}
+                        >
+                          @{f.username}
+                        </button>
+                      ))}
+                    {friends.filter((f) => f.username.toLowerCase().startsWith(mentionQueries[post.id] ?? '')).length === 0 && (
+                      <p style={{ padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text-muted)', margin: 0 }}>Ingen venner fundet</p>
+                    )}
+                  </div>
+                )}
                 <div className={styles.commentInputRow}>
                   <input
                     className={styles.commentInput}
                     placeholder="Skriv en kommentar..."
                     value={commentInputs[post.id] ?? ''}
-                    onChange={(e) => setCommentInputs((prev) => ({ ...prev, [post.id]: e.target.value }))}
+                    onChange={(e) => handleCommentInput(post.id, e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addComment(post)}
                   />
                   <button className={styles.commentSend} onClick={() => addComment(post)}>Send</button>

@@ -17,6 +17,7 @@ export default function CreateProfileScreen({
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -24,7 +25,7 @@ export default function CreateProfileScreen({
     setLoading(true);
     try {
       await signUp(email, password, username);
-      onCreated?.();
+      setShowConfirmation(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Noget gik galt');
     } finally {
@@ -90,6 +91,22 @@ export default function CreateProfileScreen({
           </form>
         </div>
       </div>
+      {showConfirmation && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ background: 'var(--color-white)', borderRadius: 20, padding: '32px 28px', width: 'calc(390px - 64px)', maxWidth: 320, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '0 10px 24px rgba(0,0,0,0.2)' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 22, color: 'var(--color-text)', textAlign: 'center', margin: 0 }}>Tjek din email</p>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--color-text)', textAlign: 'center', lineHeight: 1.5, margin: 0 }}>
+              Vi har sendt en bekræftelsesmail til <strong>{email}</strong>. Klik på linket i mailen for at aktivere din profil.
+            </p>
+            <button
+              className={styles.loginButton}
+              onClick={() => { setShowConfirmation(false); onCreated?.(); }}
+            >
+              Forstået
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

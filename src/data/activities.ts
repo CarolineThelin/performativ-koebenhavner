@@ -35,7 +35,6 @@ export const categories: Category[] = [
           { name: 'Juno', points: 5 },
           { name: 'Anderson', points: 5 },
           { name: 'Hart', points: 5 },
-          { name: 'La Glace', points: 5 },
           { name: 'Føtex', points: -5 },
         ],
       },
@@ -97,7 +96,6 @@ export const categories: Category[] = [
           { name: 'Flat white', points: 5 },
           { name: 'Cortado', points: 5 },
           { name: 'Om søerne', points: 5 },
-          { name: 'Iced', points: 5 },
         ],
       },
       {
@@ -182,9 +180,17 @@ export const categories: Category[] = [
     name: 'Main Character Moments',
     activities: [
       { name: 'Solnedgang på Dronning Louises Bro', points: 10 },
-      { name: 'Arbejde/studere på en café', points: 10 },
-      { name: 'Læs bog på offentlig bænk', points: 10 },
-      { name: 'Skrive dagbog på cafe', points: 10 },
+      {
+        name: 'På café',
+        points: 10,
+        extras: [
+          { name: 'Studere', points: 5 },
+          { name: 'Arbejde', points: 5 },
+          { name: 'Læse bog', points: 5 },
+          { name: 'Skrive dagbog', points: 5 },
+          { name: 'Før arbejde', points: 5 },
+        ],
+      },
       { name: 'En tur på en omnium', points: 10 },
       {
         name: 'Gåtur om søerne',

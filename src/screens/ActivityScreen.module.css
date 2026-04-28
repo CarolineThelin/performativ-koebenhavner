@@ -591,7 +591,7 @@
 }
 
 .likeButton.liked .likeIcon {
-  filter: invert(58%) sepia(76%) saturate(400%) hue-rotate(340deg) brightness(103%);
+  filter: invert(58%) sepia(76%) saturate(1000%) hue-rotate(340deg) brightness(103%);
 }
 
 .likeCount {

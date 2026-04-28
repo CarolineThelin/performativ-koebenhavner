@@ -125,41 +125,17 @@ export default function ActivityScreen() {
   }, [fetchFeed]);
 
   useEffect(() => {
-    async function loadFriends() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data: friendships } = await supabase
-        .from('friendships')
-        .select('friend_id')
-        .eq('user_id', user.id);
-      const friendIds = (friendships ?? []).map((f: { friend_id: string }) => f.friend_id);
-      if (friendIds.length === 0) return;
-
-      const nameMap: Record<string, string> = {};
-
-      const { data: acts } = await supabase
-        .from('user_activities')
-        .select('user_id, username')
-        .in('user_id', friendIds);
-      for (const a of acts ?? []) {
-        if (a.username && !nameMap[a.user_id]) nameMap[a.user_id] = a.username;
+    if (posts.length === 0) return;
+    const seen = new Set<string>();
+    const unique: { id: string; username: string }[] = [];
+    for (const p of posts) {
+      if (!seen.has(p.user_id) && p.username && p.user_id !== currentUserId) {
+        seen.add(p.user_id);
+        unique.push({ id: p.user_id, username: p.username });
       }
-
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, username')
-        .in('id', friendIds);
-      for (const p of profiles ?? []) {
-        if (p.username) nameMap[p.id] = p.username;
-      }
-
-      const result = friendIds
-        .filter((id: string) => nameMap[id])
-        .map((id: string) => ({ id, username: nameMap[id] }));
-      setFriends(result);
     }
-    loadFriends();
-  }, []);
+    setFriends(unique);
+  }, [posts, currentUserId]);
 
   useEffect(() => {
     const scrollToId = (location.state as { scrollToId?: string } | null)?.scrollToId;

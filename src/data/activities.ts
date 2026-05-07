@@ -22,11 +22,11 @@ export const categories: Category[] = [
       {
         name: 'BMO',
         points: 10,
+        extrasRequired: false,
         extras: [
           { name: 'Surdej', points: 5 },
           { name: 'Gammel knas', points: 5 },
           { name: 'Pisket smør', points: 5 },
-          { name: 'Plain', points: 0 },
         ],
       },
       {

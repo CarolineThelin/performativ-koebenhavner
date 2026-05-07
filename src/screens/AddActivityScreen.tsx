@@ -150,11 +150,12 @@ export default function AddActivityScreen() {
     setQualifySaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      await supabase.from('activity_suggestions').insert({
+      const { error } = await supabase.from('activity_suggestions').insert({
         user_id: user?.id ?? null,
         username: user?.user_metadata?.username ?? user?.email ?? null,
         suggestion: qualifyText.trim(),
       });
+      if (error) throw error;
       setQualifyText('');
       setQualifyMessage('Tak! Din aktivitet er sendt til vurdering.');
       setTimeout(() => { setQualifyMessage(''); setShowQualify(false); }, 2500);

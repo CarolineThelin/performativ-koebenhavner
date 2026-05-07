@@ -7,6 +7,7 @@ export interface Activity {
   name: string;
   points: number;
   extras?: Extra[];
+  extrasRequired?: boolean;
 }
 
 export interface Category {
@@ -156,10 +157,10 @@ export const categories: Category[] = [
       {
         name: 'Padel',
         points: 10,
+        extrasRequired: false,
         extras: [
           { name: 'Med mellemlederen', points: 5 },
           { name: 'Eget bat', points: 5 },
-          { name: 'Plain', points: 0 },
         ],
       },
       { name: "Barry's", points: 10, extras: [] },

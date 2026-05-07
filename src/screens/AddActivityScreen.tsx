@@ -169,7 +169,7 @@ export default function AddActivityScreen() {
   const totalPoints = calcTotalPoints();
 
   const canSubmit = selections.length > 0 && selections.every((s) =>
-    !s.activity.extras?.length || s.selectedExtras.length > 0
+    !s.activity.extras?.length || s.selectedExtras.length > 0 || s.activity.extrasRequired === false
   );
 
   return (
@@ -219,7 +219,7 @@ export default function AddActivityScreen() {
                           </span>
                         </button>
 
-                        {selected && (act.extras?.length ?? 0) > 0 && selections.find((s) => s.activity.name === act.name)?.selectedExtras.length === 0 && (
+                        {selected && (act.extras?.length ?? 0) > 0 && act.extrasRequired !== false && selections.find((s) => s.activity.name === act.name)?.selectedExtras.length === 0 && (
                           <p className={styles.extrasRequired}>Vælg mindst én underkategori</p>
                         )}
 

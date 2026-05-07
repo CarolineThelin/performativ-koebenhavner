@@ -159,6 +159,7 @@ export const categories: Category[] = [
         extras: [
           { name: 'Med mellemlederen', points: 5 },
           { name: 'Eget bat', points: 5 },
+          { name: 'Plain', points: 0 },
         ],
       },
       { name: "Barry's", points: 10, extras: [] },
